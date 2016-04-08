@@ -1,0 +1,15 @@
+---
+title: "Test"
+author: "Alex Smith"
+date: "April 8, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+This website is still in the dream phase. 
+
+
