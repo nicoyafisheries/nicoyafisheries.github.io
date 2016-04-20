@@ -35,6 +35,11 @@ We'll come back to Slack later
 - Join Group library
 - Add Chrome plugin
 
+Follow up 
+throw GD files into Z 
+correct metadata
+assign papers for tagging
+
 ## Github
 
 [NICOYAfisheries](https://github.com/nicoyafisheries)
@@ -44,6 +49,7 @@ We'll come back to Slack later
 - Check with push & pull
   
 Do we want to pay to make this private?
+NOT YET
 
 
 ## More Github 
