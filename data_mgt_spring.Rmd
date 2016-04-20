@@ -73,13 +73,13 @@ Share your calendar with
 Check out the GP deadlines calendar  
   
 We all have access to edit this  
-A notifcation will be sent to slack for every change on this calendar (general channel)  
+A notification will be sent to slack for every change on this calendar (general channel)  
 
 
 ##Google Drive
 
 - Check-in with Wagner: local folders updating?
-- Agree on strorage
+- Agree on storage
   -Do we need additional/fewer folders?
 - Discuss Markdown vs Google Docs
 
@@ -87,11 +87,12 @@ Fun fact: this folder is linked with our Slack
 
 ## Okay back to [Slack](https://nicoyafisheries.slack.com/messages/data-analysis/team/alex/)
 
-- Review Github integreation
+- Review Github integration
 - Review Calendar integration
 - Review quick poll
 - Agree on channels
 - Agree when to use slack for communication
+- [Do Not Disturb](https://nicoyafisheries.slack.com/messages/general/team/alex/)
 
 On your own: Check out the desktop App
 
