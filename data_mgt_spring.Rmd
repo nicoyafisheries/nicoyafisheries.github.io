@@ -93,4 +93,6 @@ Fun fact: this folder is linked with our Slack
 - Agree on channels
 - Agree when to use slack for communication
 
+On your own: Check out the desktop App
+
 ## Feedback?
