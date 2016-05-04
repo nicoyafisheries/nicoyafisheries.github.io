@@ -33,9 +33,25 @@ catchALL = (lapply(excel_sheets('../data/incopesca_original.xlsx'),read_excel, p
 
 
 catchFINAL = catchALL %>%
-              mutate(Region=replace(Region, Region=="Gulf of Nicoya", "Golfo de Nicoya"))
+              mutate(Region=replace(Region, Region=="Gulf of Nicoya", "Golfo de Nicoya")) %>%
+              mutate(Species=replace(Species, Species=="CAMARONBLCO.", "CAMARON BLCO.")) %>%
+              mutate(Species=replace(Species, Species=="CAMARONCAFE", "CAMARON CAFE")) %>%
+              mutate(Species=replace(Species, Species=="CAMARONROSADO", "CAMARON ROSADO"))%>% 
+              mutate(Species=replace(Species, Species=="CAMARONCAMELLO", "CAMARON CAMELLO")) %>%
+              mutate(Species=replace(Species, Species=="CAMARONROSADO", "CAMARON ROSADO"))%>% 
+              mutate(Species=replace(Species, Species=="CAMARONREAL", "CAMARON REAL")) %>%
+              mutate(Species=replace(Species, Species=="AGRIACOLA", "AGRIA COLA")) %>%
+              mutate(Species=replace(Species, Species=="ALETATIBURON", "ALETA TIBURON"))%>% 
+              mutate(Species=replace(Species, Species=="MARLINBLCO.", "MARLIN BLCO.")) %>%
+              mutate(Species=replace(Species, Species=="MARLINROS.", "MARLIN ROS.")) %>%
+              mutate(Species=replace(Species, Species=="PRIMERA PEG." , "PRIMERA PEQ.")) %>%
+              mutate(Species=replace(Species, Species== "PRIMERAPEQ.", "PRIMERA PEQ.")) %>%
+              mutate(Species=replace(Species, Species=="PRIMERAGDE.", "PRIMERA GDE.")) 
+  
+  
 
 #replace every instance of "Gulf of Nicoya" with "Golfo de Nicoya"
+#replace every instance of "CAMARONBLCO." with "CAMARON BLCO."
 
 ```
 
