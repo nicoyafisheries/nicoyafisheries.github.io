@@ -9,7 +9,7 @@ hist(CorvinaReinaSizes2009$Sizes)
 ############################################
 #CorvinaReina histogram
 #Year After closure 2012. Mesh size 2.5" . Illegal.n=548
-CorvinaReinaSizes2012. <- read.csv('./data/CorvinaReinaSizes2012..csv')
+CorvinaReinaSizes2012. <- read.csv('./data/CorvinaReinaSizes2012.csv')
 View(CorvinaReinaSizes2012.)
 hist(CorvinaReinaSizes2012.$Sizes)
 
@@ -17,7 +17,7 @@ hist(CorvinaReinaSizes2012.$Sizes)
 #############################################
 #CorvinaReina histogram
 #Year After closure 2014. Mesh size 2.5", 3" and 3.5". Illegal.n=516.
-CorvinaReinaSizes2014. <- read.csv("data/CorvinaReinaSizes2014..csv")
+CorvinaReinaSizes2014. <- read.csv("data/CorvinaReinaSizes2014.csv")
 View(CorvinaReinaSizes2014.)
 hist(CorvinaReinaSizes2014.$Size)
 
