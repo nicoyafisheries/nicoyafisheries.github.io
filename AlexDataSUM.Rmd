@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 ```
 
 ```{r load_data}
@@ -51,7 +52,7 @@ d.GN.month$date=as.Date(x, format="%d-%m-%Y" )
 
 ```{r plot_1}
 #A plot of all the species - this is a bit horrible to look at
-#
+quartz()
 ggplot(data=d.GN.month, aes(x= date, y=log(catch), col=as.factor(Species)))+
   geom_line()
 ```
@@ -66,9 +67,13 @@ PG=ggplot(subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), aes(x= date, y
   geom_hline(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), yintercept = mean(d.GN.month$catch), lty=2)+
   theme_minimal()
 
-#PG+geom_line(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA PEQ."), aes(x= date, y=catch), col="red")
+PG+geom_line(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA PEQ."), aes(x= date, y=catch), col="red")
   
 ```
 
+```{r}
+
+
+```
 
 

@@ -35,6 +35,7 @@ catchALL = (lapply(excel_sheets('../data/incopesca_original.xlsx'),read_excel, p
 catchFINAL = catchALL %>%
               mutate(Region=replace(Region, Region=="Gulf of Nicoya", "Golfo de Nicoya")) %>%
               mutate(Species=replace(Species, Species=="CAMARONBLCO.", "CAMARON BLCO.")) %>%
+              mutate(Species=replace(Species, Species=="CAMARON BLCO", "CAMARON BLCO.")) %>%
               mutate(Species=replace(Species, Species=="CAMARONCAFE", "CAMARON CAFE")) %>%
               mutate(Species=replace(Species, Species=="CAMARONROSADO", "CAMARON ROSADO"))%>% 
               mutate(Species=replace(Species, Species=="CAMARONCAMELLO", "CAMARON CAMELLO")) %>%
