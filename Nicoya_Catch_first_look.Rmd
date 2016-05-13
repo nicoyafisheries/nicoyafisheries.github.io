@@ -74,6 +74,7 @@ PG+geom_line(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA PEQ."), aes(x=
 
 ```{r variablity_within_months}
 ggplot(subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), aes(x= month.num, y=catch,col=as.factor(month)))+
+  scale_x_continuous(breaks = c(1,2,3,4,5,6,7,8,9,10,11,12))+
   geom_boxplot()
 
 ```
