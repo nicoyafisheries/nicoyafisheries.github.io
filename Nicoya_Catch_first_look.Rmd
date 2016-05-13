@@ -1,5 +1,5 @@
 ---
-title: "Inital Data Summary and Visulaization"
+title: "Catch Data Summary and Visulaization"
 author: "Alex Smith"
 date: "April 26, 2016"
 output: html_document
@@ -8,9 +8,11 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
+#setwd('..')
 
 library(dplyr)
 library(tidyr)
+library(ggplot2)
 ```
 
 ```{r load_data}
@@ -51,7 +53,7 @@ d.GN.month$date=as.Date(x, format="%d-%m-%Y" )
 
 ```{r plot_1}
 #A plot of all the species - this is a bit horrible to look at
-#
+quartz()
 ggplot(data=d.GN.month, aes(x= date, y=log(catch), col=as.factor(Species)))+
   geom_line()
 ```
@@ -66,9 +68,26 @@ PG=ggplot(subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), aes(x= date, y
   geom_hline(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), yintercept = mean(d.GN.month$catch), lty=2)+
   theme_minimal()
 
-#PG+geom_line(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA PEQ."), aes(x= date, y=catch), col="red")
+PG+geom_line(data=subset(d.GN.month, d.GN.month$Species=="PRIMERA PEQ."), aes(x= date, y=catch), col="red")
   
 ```
 
+```{r variablity_within_months}
+ggplot(subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE."), aes(x= month.num, y=catch,col=as.factor(month)))+
+  geom_boxplot()
 
+```
+
+```{r PG_timeseries}
+d.PrimG = subset(d.GN.month, d.GN.month$Species=="PRIMERA GDE.") %>%
+          arrange( date)
+
+library(forecast)
+
+PrimeraGrandeTS = ts(d.PrimG$catch, frequency= 12, start=c(1990,1))
+
+decompPG.catch = decompose(PrimeraGrandeTS)
+plot(decompPG.catch)
+
+```
 

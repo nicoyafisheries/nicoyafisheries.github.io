@@ -25,7 +25,7 @@ library(tidyr)
 
 ```{r create_dataframe}
 
-catchALL = (lapply(excel_sheets('../data/incopesca_original.xlsx'),read_excel, path='../data/incopesca_original.xlsx' )) %>%
+catchALL = (lapply(excel_sheets('../data/RAW/incopesca_original.xlsx'),read_excel, path='../data/RAW/incopesca_original.xlsx' )) %>%
             bind_rows() %>%
             filter(!is.na(Region)) %>% #removing entirely blank rows
             as.data.frame()
@@ -35,6 +35,7 @@ catchALL = (lapply(excel_sheets('../data/incopesca_original.xlsx'),read_excel, p
 catchFINAL = catchALL %>%
               mutate(Region=replace(Region, Region=="Gulf of Nicoya", "Golfo de Nicoya")) %>%
               mutate(Species=replace(Species, Species=="CAMARONBLCO.", "CAMARON BLCO.")) %>%
+              mutate(Species=replace(Species, Species=="CAMARON BLCO", "CAMARON BLCO.")) %>%
               mutate(Species=replace(Species, Species=="CAMARONCAFE", "CAMARON CAFE")) %>%
               mutate(Species=replace(Species, Species=="CAMARONROSADO", "CAMARON ROSADO"))%>% 
               mutate(Species=replace(Species, Species=="CAMARONCAMELLO", "CAMARON CAMELLO")) %>%
