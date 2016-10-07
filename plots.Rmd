@@ -1,0 +1,107 @@
+---
+title: "catch 1952-2013"
+author: "Alex Smith"
+date: "June 2, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(gridExtra)
+library(plotly)
+```
+
+```{r change_fun}
+
+percent.change=function(inital, end){
+  
+  
+  
+  pc= ((end-inital)/inital)*100
+  pc[1]=0
+   
+  return(pc)
+}
+
+
+```
+
+
+```{r data}
+
+d1=read_csv('./data/catch_1952_2013.csv')  %>%
+    mutate(PG.catch_yr_min1 = lag(Corvina.y.Robalo)) %>%
+    mutate(PG.chgC = percent.change(PG.catch_yr_min1,Corvina.y.Robalo)) %>%
+    mutate(CB.catch_yr_min1 = lag(Camaron.Blco)) %>%
+    mutate(CB.chgC = percent.change(CB.catch_yr_min1,Camaron.Blco)) 
+
+
+d2=read.csv('./data/incopesca_catch.csv') %>%
+   filter(Region=="Golfo de Nicoya")    
+```
+
+```{r plot}
+PG.still=ggplot(d1, aes(x = Year, y = Corvina.y.Robalo)) +
+  geom_line() +
+  geom_vline(xintercept=1985, lty=2, col="darkgrey") +
+  annotate("text", label="Subsidies\nstarts", x=2006, y=400, hjust=0) +
+  geom_vline(xintercept=2005, lty=2, col="darkgrey") +
+  annotate("text", label="Closure\nstarts", x=1986, y=400, hjust=0) +
+  labs(y=" Corvina & Robalo\ncatch (m tons)") +
+  theme_minimal()
+
+CB.still=ggplot(data=d1, aes(x = Year, y = Camaron.Blco)) +   
+  geom_line() +
+  geom_vline(xintercept=1985, lty=2, col="darkgrey") +
+  geom_vline(xintercept=2005, lty=2, col="darkgrey") +
+   labs(y=" White Shrimp\ncatch (m tons)")+
+  theme_minimal()
+
+(PG  <- ggplotly(PG.still) )
+(CB  <- ggplotly(CB.still) )
+
+# grid.arrange(PG, CB)
+
+# dev.off()
+# pdf("catchfig.pdf", width = 11, height=8 )
+# grid.arrange(PG, CB)
+# dev.off()
+
+```
+
+```{r alt.plots, echo=FALSE}
+PG.alt=ggplot(subset(d2, Species=="PRIMERA GDE.") , aes(x = Year, y = Total/1000)) +
+  geom_line() +
+  annotate("text", label="Subsidies\nstarts", x=2002, y=250, hjust=0) +
+  geom_vline(xintercept=2005, lty=2, col="darkgrey") +
+  labs(y=" Corvina & Robalo\ncatch (thousand kg)") +
+  theme_minimal()
+
+CB.alt=ggplot(subset(d2, Species=="CAMARON BLCO.") , aes(x = Year, y = Total/1000)) +
+  geom_line() +
+  geom_vline(xintercept=2005, lty=2, col="darkgrey") +
+   labs(y=" White Shrimp\ncatch (thousand kg)")+
+  theme_minimal()
+
+grid.arrange(PG.alt, CB.alt)
+```
+
+
+```{r}
+
+PG.chg = ggplot(d1, aes( Year, PG.chgC)) +
+          geom_bar(stat = "identity") +
+          theme_minimal()
+
+CB.chg = ggplot(data=d1, aes(Year,CB.chgC)) +   
+         geom_bar(stat = "identity") +
+         theme_minimal()
+
+grid.arrange(PG.chg, CB.chg)
+
+```
+

@@ -5,7 +5,10 @@ date: "April 18, 2016"
 output: html_document
 ---
 
-incopesca_original.xlsx has monthly catch data for every year from 1990-2013 for Guanacaste, Golfo de Nicoya (also "Gulf of Nicoya" ), Quepos, Golfito, Mar Caribe, and Limon. The catch data for each year is on a different sheet. This script joins the mutliple excel sheets into a single data frame and replaces every instance of "Gulf of Nicoya" with "Golfo de Nicoya". 
+incopesca_original.xlsx has monthly catch data (Kg) for every year from 1990-2013 for Guanacaste, Golfo de Nicoya (also "Gulf of Nicoya" ), Quepos, Golfito, Mar Caribe, and Limon. The catch data for each year is on a different sheet. This script joins the mutliple excel sheets into a single data frame and replaces every instance of "Gulf of Nicoya" with "Golfo de Nicoya". 
+
+Data Source: SECCION DE ESTADISTICA PESQUERA  INCOPESCA, CON INFORMACION PRIMARIA BRINDADA POR LOS PESCADORES
+https://www.incopesca.go.cr/publicaciones/estadiscticas/historico/2013.html
 
 The output is a .csv file "incopesca_catch" in the 'data' folder. 
 
@@ -22,6 +25,7 @@ library(dplyr)
 library(readxl) 
 library(tidyr)
 ```
+
 
 ```{r create_dataframe}
 

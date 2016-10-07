@@ -1,0 +1,44 @@
+---
+title: "Merge two periods of catch data"
+author: "Alex Smith"
+date: "June 2, 2016"
+output: html_document
+---
+
+incopesca_catch.csv has monthly catch data (Kg) for every year from 1990-2013 for Guanacaste, Golfo de Nicoya (also "Gulf of Nicoya" ), Quepos, Golfito, Mar Caribe, and Limon. 
+
+Data Source: SECCION DE ESTADISTICA PESQUERA  INCOPESCA, CON INFORMACION PRIMARIA BRINDADA POR LOS PESCADORES
+https://www.incopesca.go.cr/publicaciones/estadiscticas/historico/2013.html
+
+catch_pre1990.csv has catch data (metric tons) from 1952-2013 for 
+
+The output is a .csv file "incopesca_catch" in the 'data' folder. 
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+if (basename(getwd())!='data_scripts'){
+  setwd('data_scripts')
+}
+#makes sure you are in the right folder
+
+library(dplyr)
+library(readxl) 
+library(tidyr)
+```
+
+```{r cars}
+d1=read.csv('./data/incopesca_catch.csv') %>%
+  filter(Region=="Golfo de Nicoya") 
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -20,6 +20,16 @@ library(ggplot2)
 d1=read.csv('./data/incopesca_catch.csv') %>%
   filter(Region=="Golfo de Nicoya") 
 
+t=d1 %>%
+  group_by(Year) %>%
+  summarise(sum(Total))
+
+propPG=d1$Total[d1$Species=="PRIMERA GDE."]/t$`sum(Total)`
+
+propCB=d1$Total[d1$Species=="CAMARON BLCO."]/t$`sum(Total)`
+
+plot(t$Year,propPG)
+
 #reads in the clean data and filters out data for Gulf of Nicoya
 ```
 
