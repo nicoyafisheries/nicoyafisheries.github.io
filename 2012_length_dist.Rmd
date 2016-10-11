@@ -22,10 +22,11 @@ corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2
 
 ```{r plot}
 
-p1<- ggplot(corvina.all.2012, aes(length_class, fill = label)) +
+p1<- ggplot(corvina.all.2012, aes(length_class, fill=factor(label, levels =    unique(label)))) +
     geom_histogram(binwidth = 1) +
-   theme_minimal()
-
+    theme_minimal()+
+    guides(fill=guide_legend(title="Month"))
+   
 ggplotly(p1)
 
 ```
