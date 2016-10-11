@@ -32,7 +32,10 @@ ggplotly(p1)
 ```
 
 
-This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from FAO. 
+This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from FAO:
+
+$$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
+
 
  ** the second seems better because we know that length/ age at maturity if 55cm/5years
 ```{r age_at_length}
@@ -56,7 +59,6 @@ corvina.all.2012$age_class1 = corvina.age1
 corvina.all.2012$age_class2 = corvina.age2
 
 ```
-$$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
 
 ```{r plot_length_age}
 corvina.age.length <- unique(corvina.all.2012[,c('age_class2','length_class')])
