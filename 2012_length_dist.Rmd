@@ -32,7 +32,7 @@ ggplotly(p1)
 ```
 
 
-This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from FAO:
+This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from [FAO](http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data):
 
 $$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
 
