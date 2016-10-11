@@ -1,0 +1,32 @@
+
+```{r setup}
+library(dplyr)
+library(tidyr)
+library(reshape)
+library(ggplot2)
+library(lubridate)
+library(plotly)
+
+```
+
+
+```{r length_dist_2012}
+
+corvina.all.2012.short<- read.csv('./data/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
+
+corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
+  mutate(label = month.abb[month(date)])
+
+```
+
+```{r plot}
+
+p1<- ggplot(corvina.all.2012, aes(length_class, fill = label)) +
+    geom_histogram(binwidth = 1) +
+   theme_minimal()
+
+ggplotly(p1)
+
+```
+
