@@ -74,7 +74,9 @@ corvina.all.2012$age_class2 = corvina.age2
 ```
 
 ```{r plot_length_age}
-corvina.age.length <- unique(corvina.all.2012[,c('length_class','age_class2')]) 
+corvina.age.length <- unique(corvina.all.2012[,c('length_class','age_class2')]) %>%
+  dplyr::arrange(length_class)
+
 
 ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
   geom_point() +
@@ -86,11 +88,13 @@ ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
   
 "In the present context D t is the time it takes for an average fish to grow from length L1 to length L2, so we obtain D t by subtracting the two inverse von Bertalanffy equations (Eq. 3.3.3.2) corresponding to L2 and L1 respectively and obtain:"
 ```{r calculating_D}
-
+#Vector to label L1 - L2 
 L1.L2 <-vector(length=length(corvina.age.length$length_class))
 
+#Vector to identify if difference in length classes is greater than 1
 delta <- vector(length=length(corvina.age.length$length_class))
 
+#Vector of the time it takes to grow from L1 to L2
 D <- vector(length=length(corvina.age.length$length_class))
 
 
@@ -110,6 +114,15 @@ D[i] <- corvina.age.length[(i+1),2] - corvina.age.length[i,2]
 }
 
 table <- data.frame(L1.L2, D, delta)
+
+```
+
+```{r show_D, fig.width=4}
+
+library(DT)
+datatable(table, options = list(
+                            pageLength = 25, 
+                            autoWidth = TRUE))
 
 ```
 
