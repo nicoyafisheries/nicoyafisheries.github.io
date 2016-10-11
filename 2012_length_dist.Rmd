@@ -1,5 +1,5 @@
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
 library(reshape)
