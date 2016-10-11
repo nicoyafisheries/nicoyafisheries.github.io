@@ -80,7 +80,8 @@ corvina.age.length <- unique(corvina.all.2012[,c('length_class','age_class2')]) 
 
 ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
   geom_point() +
-  theme_minimal()
+  theme_minimal() +
+  labs(x = "Age years (age_class2)", y = "Length class (1 cm bins)")
 
 ```
 
