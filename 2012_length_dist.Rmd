@@ -1,3 +1,11 @@
+---
+title: "Corvina Reina Gulf of Nicoya Zone 201 2012"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+##Setup
 
 ```{r setup, message=FALSE, warning=FALSE}
 library(dplyr)
@@ -20,6 +28,8 @@ corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2
 
 ```
 
+## Length Composition Corvina Reina 2012
+
 ```{r plot}
 
 p1<- ggplot(corvina.all.2012, aes(length_class, fill=factor(label, levels =    unique(label)))) +
@@ -30,14 +40,17 @@ p1<- ggplot(corvina.all.2012, aes(length_class, fill=factor(label, levels =    u
 ggplotly(p1)
 
 ```
+  
+<spacer> 
 
+## Age at length
 
 This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from [FAO](http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data):
 
 $$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
 
 
- ** the second seems better because we know that length/ age at maturity if 55cm/5years
+ ** the second seems better because we know that length/ age at maturity if 55 cm/5 years
 ```{r age_at_length}
 #Model parameters fom Mug Villanueva (1994)
 #Used the lower bound of the range
@@ -61,11 +74,42 @@ corvina.all.2012$age_class2 = corvina.age2
 ```
 
 ```{r plot_length_age}
-corvina.age.length <- unique(corvina.all.2012[,c('age_class2','length_class')])
+corvina.age.length <- unique(corvina.all.2012[,c('length_class','age_class2')]) 
 
 ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
   geom_point() +
   theme_minimal()
+
+```
+
+## Time to next size class (D)
+  
+"In the present context D t is the time it takes for an average fish to grow from length L1 to length L2, so we obtain D t by subtracting the two inverse von Bertalanffy equations (Eq. 3.3.3.2) corresponding to L2 and L1 respectively and obtain:"
+```{r calculating_D}
+
+L1.L2 <-vector(length=length(corvina.age.length$length_class))
+
+delta <- vector(length=length(corvina.age.length$length_class))
+
+D <- vector(length=length(corvina.age.length$length_class))
+
+
+
+for (i in 1:length(corvina.age.length$length_class)){
+  
+L1 <- corvina.age.length[i,1]
+
+L2 <- corvina.age.length[(i+1),1]
+  
+L1.L2[i] <-paste(L1, L2, sep="-") 
+
+delta[i] <- L2 - L1
+
+D[i] <- corvina.age.length[(i+1),2] - corvina.age.length[i,2]
+
+}
+
+table <- data.frame(L1.L2, D, delta)
 
 ```
 
