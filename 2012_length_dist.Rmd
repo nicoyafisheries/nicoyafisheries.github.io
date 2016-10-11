@@ -117,6 +117,18 @@ table <- data.frame(L1.L2, D, delta)
 
 ```
 
+```{r plot_D, warning= FALSE}
+
+corvina.age.length$D <- D/delta
+
+ggplot(data = corvina.age.length, aes(x = length_class, y = D)) +
+  geom_point() +
+  theme_minimal() +
+  labs(y="Time to next length class (D) ")
+
+```
+
+
 ```{r show_D, fig.width=4}
 
 library(DT)
