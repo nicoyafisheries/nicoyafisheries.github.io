@@ -85,6 +85,21 @@ ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
 
 ```
 
+
+## Age Composition Corvina Reina 2012
+
+```{r plot}
+
+p2<- ggplot(corvina.all.2012, aes(age_class2, fill=factor(label, levels =    unique(label)))) +
+    geom_histogram(binwidth = 1) +
+    theme_minimal()+
+    guides(fill=guide_legend(title="Month"))
+   
+ggplotly(p2)
+
+```
+  
+
 ## Time to next size class (D)
   
 "In the present context D t is the time it takes for an average fish to grow from length L1 to length L2, so we obtain D t by subtracting the two inverse von Bertalanffy equations (Eq. 3.3.3.2) corresponding to L2 and L1 respectively and obtain:"
