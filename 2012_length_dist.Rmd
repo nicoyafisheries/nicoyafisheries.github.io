@@ -88,7 +88,7 @@ ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
 
 ## Age Composition Corvina Reina 2012
 
-```{r plot}
+```{r plot_age}
 
 p2<- ggplot(corvina.all.2012, aes(age_class2, fill=factor(label, levels =    unique(label)))) +
     geom_histogram(binwidth = 1) +
