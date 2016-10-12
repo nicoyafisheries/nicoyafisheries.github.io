@@ -103,6 +103,9 @@ ggplotly(p2)
 ## Time to next size class (D)
   
 "In the present context D t is the time it takes for an average fish to grow from length L1 to length L2, so we obtain D t by subtracting the two inverse von Bertalanffy equations (Eq. 3.3.3.2) corresponding to L2 and L1 respectively and obtain:"
+
+$$\Delta t = t(L_2) - t(L_1) = \frac{1}{K} * ln\Big(\frac{L_{inf}-L_1}{L_{inf}-L_2}\Big)$$
+
 ```{r calculating_D}
 #Vector to label L1 - L2 
 L1.L2 <-vector(length=length(corvina.age.length$length_class))
@@ -113,7 +116,8 @@ delta <- vector(length=length(corvina.age.length$length_class))
 #Vector of the time it takes to grow from L1 to L2
 D <- vector(length=length(corvina.age.length$length_class))
 
-
+#Vector for the x axis of linearized catch curve (I dont understand it conceptually yet)
+x <- vector(length=length(corvina.age.length$length_class))
 
 for (i in 1:length(corvina.age.length$length_class)){
   
@@ -125,7 +129,14 @@ L1.L2[i] <-paste(L1, L2, sep="-")
 
 delta[i] <- L2 - L1
 
-D[i] <- corvina.age.length[(i+1),2] - corvina.age.length[i,2]
+D[i] <- (1/K)*log((Linf-L1)/(Linf-L2))
+ 
+  #this equation for D is the same as saying:
+  #corvina.age.length[(i+1),2] - corvina.age.length[i,2]
+
+x[i] <- to - (1/K)*(log(1-((L1+L2)/(2*Linf))))
+
+
 
 }
 
@@ -136,6 +147,8 @@ table <- data.frame(L1.L2, D, delta)
 ```{r plot_D, warning= FALSE}
 
 corvina.age.length$D <- D/delta
+corvina.age.length$x <- x
+
 
 ggplot(data = corvina.age.length, aes(x = length_class, y = D)) +
   geom_point() +
@@ -151,6 +164,47 @@ library(DT)
 datatable(table, options = list(
                             pageLength = 25, 
                             autoWidth = TRUE))
+
+```
+
+
+##Catch Curve 
+
+following steps from FAO:
+  
+Table 4.4.5.1 Linearized catch curve based on length composition data
+  
+```{r Linearized_catch_curve_data}
+
+corvina.catch.curve<- corvina.all.2012.short[,4:5] %>%
+                        dplyr::group_by(length_class) %>%
+                        dplyr::summarise(count_total = sum(count))
+
+corvina.catch.curve$age <- corvina.age.length$age_class2
+
+corvina.catch.curve$D <- D
+      
+corvina.catch.curve$x <- x
+
+corvina.catch.curve$y <- log(corvina.catch.curve$count_total/corvina.catch.curve$D)
+
+```
+
+```{r test_plot_catch_curve}
+
+catch.curve.model <- lm(y~x, corvina.catch.curve)
+
+Z <- catch.curve.model$coefficients[2]
+
+SE <- 0.01756
+
+ggplot(corvina.catch.curve, aes(x= x, y=y)) +
+  geom_point()+
+  stat_smooth(method = lm) +
+  theme_minimal() +
+  annotate("text", x= 12, y= 6, label = paste("Z = ",(round(Z, digits = 4)) , SE, sep = " ± "))
+  
+  
 
 ```
 
