@@ -202,7 +202,7 @@ ggplot(corvina.catch.curve, aes(x= x, y=y)) +
   geom_point()+
   stat_smooth(method = lm) +
   theme_minimal() +
-  annotate("text", x= 12, y= 6, label = paste("Z = ",(round(Z, digits = 4)) , SE, sep = " ± "))
+  annotate("text", x= 12, y= 6, label = paste("- Z = ", paste((round(Z, digits = 4)) , SE, sep = " ± ")))
   
   
 
