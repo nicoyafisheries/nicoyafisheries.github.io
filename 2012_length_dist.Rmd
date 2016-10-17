@@ -144,6 +144,8 @@ table <- data.frame(L1.L2, D, delta)
 
 ```
 
+
+
 ```{r plot_D, warning= FALSE}
 
 corvina.age.length$D <- D/delta
@@ -162,7 +164,7 @@ ggplot(data = corvina.age.length, aes(x = length_class, y = D)) +
 
 library(DT)
 datatable(table, options = list(
-                            pageLength = 25, 
+                            pageLength = 5, 
                             autoWidth = TRUE))
 
 ```
@@ -175,12 +177,16 @@ following steps from FAO:
 Table 4.4.5.1 Linearized catch curve based on length composition data
   
 ```{r Linearized_catch_curve_data}
+#Gathers all the lengths into a df of length classes and total counts for 2012 (all gear types)
 
 corvina.catch.curve<- corvina.all.2012.short[,4:5] %>%
                         dplyr::group_by(length_class) %>%
                         dplyr::summarise(count_total = sum(count))
 
+#adds age value (years) with matching length and annual count value
 corvina.catch.curve$age <- corvina.age.length$age_class2
+
+#adds "delta t" - time to next length class
 
 corvina.catch.curve$D <- D
       
@@ -188,7 +194,19 @@ corvina.catch.curve$x <- x
 
 corvina.catch.curve$y <- log(corvina.catch.curve$count_total/corvina.catch.curve$D)
 
+#Sets Length at first capture to the mode of the length dist
+
+Lc <- corvina.catch.curve$length_class[which.max(corvina.catch.curve$count_total)]
+
+# filters out all lengths smaller than Lc
+
+corvina.catch.curve <- dplyr::filter(corvina.catch.curve, length_class >= Lc)
+
 ```
+
+$$x = t\Big(\frac{L_1 + L_2}{2}\Big) = t_0 - \frac{1}{K} * ln\Big(1-\frac{L_{1}+L_2}{2L_{inf}}\Big)$$
+
+$$y = ln\Big(\frac{C(L_1, L_2)}{\Delta t(L_1, L_2)}\Big)$$
 
 ```{r test_plot_catch_curve}
 
