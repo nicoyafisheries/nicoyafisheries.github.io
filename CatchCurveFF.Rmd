@@ -35,7 +35,7 @@ LH <- as.data.frame(matrix(data = NA, nrow = 1, ncol = 3))
 
 LH$Linf <- 122.1
 
-LH$to <- -0.136
+LH$to <- -0.136zza
 
 LH$K <- 0.121
 
