@@ -8,6 +8,10 @@ output:
 ##Setup
 
 ```{r setup, message=FALSE, warning=FALSE}
+
+rm(list=ls())
+
+
 library(dplyr)
 library(tidyr)
 library(reshape)
@@ -20,8 +24,9 @@ library(plotly)
 
 ```{r length_dist_2012}
 
-corvina.all.2012.short<- read.csv('./data/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short<- read.csv('./data/RAW/Length_2012/corvina_length_monthly_2012.csv') 
 corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
+
 
 corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
   mutate(label = month.abb[month(date)])
@@ -56,8 +61,9 @@ $$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
 #Used the lower bound of the range
 
 Linf = 122.1
-to = -0.136
-K = 0.121
+to = 0.919
+K = 0.172
+
 
 #Equation from Dan's code
 corvina.age1 <- log(1-(pmin(corvina.all.2012$length_class, Linf*.99))/(-K)) + to
@@ -119,6 +125,10 @@ D <- vector(length=length(corvina.age.length$length_class))
 #Vector for the x axis of linearized catch curve (I dont understand it conceptually yet)
 x <- vector(length=length(corvina.age.length$length_class))
 
+# Lx is the averge of length Li and L(i+1)
+Lx <- vector(length=length(corvina.age.length$length_class))
+
+
 for (i in 1:length(corvina.age.length$length_class)){
   
 L1 <- corvina.age.length[i,1]
@@ -134,8 +144,11 @@ D[i] <- (1/K)*log((Linf-L1)/(Linf-L2))
   #this equation for D is the same as saying:
   #corvina.age.length[(i+1),2] - corvina.age.length[i,2]
 
-x[i] <- to - (1/K)*(log(1-((L1+L2)/(2*Linf))))
+# Lx is the averge of length Li and L(i+1)
+Lx[i] <- (L1+L2)/2
 
+#coverts Lx to age
+x[i] <- to - (1/K) * log(1-Lx[i]/Linf)
 
 
 }
@@ -160,16 +173,6 @@ ggplot(data = corvina.age.length, aes(x = length_class, y = D)) +
 ```
 
 
-```{r show_D, fig.width=4}
-
-library(DT)
-datatable(table, options = list(
-                            pageLength = 5, 
-                            autoWidth = TRUE))
-
-```
-
-
 ##Catch Curve 
 
 following steps from FAO:
@@ -185,6 +188,10 @@ corvina.catch.curve<- corvina.all.2012.short[,4:5] %>%
 
 #adds age value (years) with matching length and annual count value
 corvina.catch.curve$age <- corvina.age.length$age_class2
+
+#we identified an error in the monthly length distribution data for Corvina at L = 55cm 
+#this is a manual correction of the sum of n(L=50)
+corvina.catch.curve[24, 2] = 38 
 
 #adds "delta t" - time to next length class
 
@@ -208,13 +215,13 @@ $$x = t\Big(\frac{L_1 + L_2}{2}\Big) = t_0 - \frac{1}{K} * ln\Big(1-\frac{L_{1}+
 
 $$y = ln\Big(\frac{C(L_1, L_2)}{\Delta t(L_1, L_2)}\Big)$$
 
-```{r test_plot_catch_curve}
+```{r test_plot_catch_curve, warning=FALSE}
 
 catch.curve.model <- lm(y~x, corvina.catch.curve)
 
 Z <- catch.curve.model$coefficients[2]
 
-SE <- 0.01756
+SE <- 0.01726
 
 ggplot(corvina.catch.curve, aes(x= x, y=y)) +
   geom_point()+
@@ -226,3 +233,13 @@ ggplot(corvina.catch.curve, aes(x= x, y=y)) +
 
 ```
 
+
+
+```{r catch_curve_DT, fig.width=4}
+
+library(DT)
+datatable(corvina.catch.curve, options = list(
+                            pageLength = 5, 
+                            autoWidth = TRUE))
+
+```
