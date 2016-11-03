@@ -6,7 +6,8 @@
 #
 #LH <- VB Life history parameters Linf, K, to 
 
-CatchCurve <- function(LengthData, LH){
+CatchCurve <- function(LengthData, LH, ageBins){
+  LengthData= corvina.all.2012
   
   Lengths <- LengthData$length_class
   
@@ -18,21 +19,27 @@ CatchCurve <- function(LengthData, LH){
   
   Ages <- to - (1/K) * log(1-Lengths/Linf)
   
-  Age.freq <- as.data.frame(table(Ages))
+  ageBins = 1
   
-  x <- Age.freq$Ages
+  br <- seq(from = round(min(Ages)), to=(max(Ages)+1), by = ageBins)
   
-  y <- log(Age.freq$Freq)
+  #Age.freq <- as.data.frame(table(Ages)) %>%
+    freq   = hist(Ages, breaks = br, include.lowest=TRUE, plot=FALSE)
   
+  x <- freq$Ages
   
+  y <- log(freq$counts)
   
-  catch.curve.model <- lm(y~x, Age.freq)
+Age.freq<-  data.frame(Age = head(br,-1), 
+                      lnCounts = log(freq$counts))
+  
+  catch.curve.model <- lm(Counts~Age, Age.freq)
   
   Z <- catch.curve.model$coefficients[2]
   
   SE <- 0.01726
   
-  ggplot(Age.freq, aes(x= x, y=y)) +
+p1<<- ggplot(Age.freq, aes(x= Age, y=Counts)) +
     geom_point()+
     stat_smooth(method = lm) +
     theme_minimal() +
@@ -40,6 +47,6 @@ CatchCurve <- function(LengthData, LH){
  
 print(Z)
 
-return(Age.freq)
+Age.freq <<- Age.freq
    
 }

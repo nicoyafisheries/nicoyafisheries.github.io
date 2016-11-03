@@ -21,7 +21,7 @@ library(plotly)
 
 ```{r length_dist_2012}
 
-corvina.all.2012.short<- read.csv('./data/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short<- read.csv('./data/RAW/Length_2012/corvina_length_monthly_2012.csv') 
 corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
 
 corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
@@ -35,9 +35,9 @@ LH <- as.data.frame(matrix(data = NA, nrow = 1, ncol = 3))
 
 LH$Linf <- 122.1
 
-LH$to <- -0.136zza
+LH$to <- 0.919
 
-LH$K <- 0.121
+LH$K <- 0.172
 
 ```
 

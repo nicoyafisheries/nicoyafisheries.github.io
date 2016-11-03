@@ -117,7 +117,7 @@ $$\Delta t = t(L_2) - t(L_1) = \frac{1}{K} * ln\Big(\frac{L_{inf}-L_1}{L_{inf}-L
 L1.L2 <-vector(length=length(corvina.age.length$length_class))
 
 #Vector to identify if difference in length classes is greater than 1
-delta <- vector(length=length(corvina.age.length$length_class))
+#delta <- vector(length=length(corvina.age.length$length_class))
 
 #Vector of the time it takes to grow from L1 to L2
 D <- vector(length=length(corvina.age.length$length_class))
@@ -137,7 +137,7 @@ L2 <- corvina.age.length[(i+1),1]
   
 L1.L2[i] <-paste(L1, L2, sep="-") 
 
-delta[i] <- L2 - L1
+#delta[i] <- L2 - L1
 
 D[i] <- (1/K)*log((Linf-L1)/(Linf-L2))
  
@@ -153,7 +153,7 @@ x[i] <- to - (1/K) * log(1-Lx[i]/Linf)
 
 }
 
-table <- data.frame(L1.L2, D, delta)
+table <- data.frame(L1.L2, D)
 
 ```
 
@@ -161,7 +161,7 @@ table <- data.frame(L1.L2, D, delta)
 
 ```{r plot_D, warning= FALSE}
 
-corvina.age.length$D <- D/delta
+corvina.age.length$D <- D  #/delta
 corvina.age.length$x <- x
 
 
