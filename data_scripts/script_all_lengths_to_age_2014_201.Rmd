@@ -1,0 +1,55 @@
+
+```{r setup, include=FALSE}
+rm(list=ls())
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(reshape)
+library(lubridate)
+
+if (basename(getwd())!='data_scripts'){
+  setwd('data_scripts')
+}
+```
+
+
+```{r load_and_gather_data}
+# A length class of "23" can be understood as an indiviual fish whose length is between 22 cm and 23cm
+
+corvina.all.2014.short<-read.csv('../data/RAW/Length_2014/corvina_length_all_201_2014.csv') %>%
+  mutate(length_class = round(length_RAW)) %>%
+  mutate(count = round(count_RAW))
+
+
+corvina.all.2014 <- untable(corvina.all.2014.short[ ,1:3], num=corvina.all.2014.short[ ,4]) 
+  
+  
+```
+
+
+```{r length_to_age}
+
+#Model parameters fom Mug Villanueva (1994)
+#Used the lower bound of the range
+
+Linf = 122.1
+to = 0.919
+K = 0.172
+
+
+corvina.age <- to - (1/K) * log(1-corvina.all.2014$length_class/Linf)
+
+corvina.all.2014$age = corvina.age
+
+corvina.all.2014$age_class = trunc(corvina.age)
+
+
+```
+
+```{r write_file}
+write.csv(corvina.all.2014, file = '../data/corvina2014_length_201_allgear.csv') 
+```
+
+

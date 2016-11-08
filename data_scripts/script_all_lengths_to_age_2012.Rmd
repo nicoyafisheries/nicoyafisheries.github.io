@@ -1,0 +1,54 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(tidyr)
+library(reshape)
+library(lubridate)
+
+if (basename(getwd())!='data_scripts'){
+  setwd('data_scripts')
+}
+```
+
+
+```{r load_and_gather_data}
+# A length class of "23" can be understood as an indiviual fish whose length is between 22 cm and 23cm
+
+corvina.all.2012.short<- read.csv('../data/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
+
+corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
+  mutate(label = month.abb[month(date)])
+
+```
+
+
+Convert lengths to age with inverse Von Bert growth function:
+
+[FAO](http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data):
+
+$$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
+
+
+```{r length_to_age}
+
+#Model parameters fom Mug Villanueva (1994)
+#Used the lower bound of the range
+
+Linf = 122.1
+to = 0.919
+K = 0.172
+
+
+corvina.age <- to - (1/K) * log(1-corvina.all.2012$length_class/Linf)
+
+corvina.all.2012$age = corvina.age
+
+```
+
+```{r write_file}
+write.csv(corvina.all.2012, file = '../data/corvina2012_length-age_all.csv')
+```
+

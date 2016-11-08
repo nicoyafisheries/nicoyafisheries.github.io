@@ -7,21 +7,31 @@ output:
 ---
 ##Setup
 
-```{r setup, message=FALSE, warning=FALSE}
-library(dplyr)
-library(tidyr)
-library(reshape)
-library(ggplot2)
-library(lubridate)
-library(plotly)
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+
+rm(list=ls())
+
+pkgs <- c( 'ggplot2','tidyr', 'reshape', 'dplyr', 'lubridate', 'plotly')
+
+#This will install necessary packages on local machine
+load.packages = function(a){
+  if(!require(a, character.only = TRUE)){
+    install.packages(a)
+    library(a, character.only = TRUE)
+  }
+}
+
+lapply(pkgs, load.packages)
+
 
 ```
 
 
 ```{r length_dist_2012}
 
-corvina.all.2012.short<- read.csv('./data/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short<- read.csv('./data/RAW/Length_2012/corvina_length_monthly_2012.csv') 
 corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
+
 
 corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
   mutate(label = month.abb[month(date)])
@@ -45,7 +55,7 @@ ggplotly(p1)
 
 ## Age at length
 
-This is two different approaches to convert lengths to age. The first is a formula I got from someone elses code. The second is the equation from [FAO](http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data):
+This is the inverse VB growth function the equation from [FAO](http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data):
 
 $$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
 
@@ -53,35 +63,34 @@ $$t(L)=t_0 - 1/K * ln(1-L/L_{inf})$$
  ** the second seems better because we know that length/ age at maturity if 55 cm/5 years
 ```{r age_at_length}
 #Model parameters fom Mug Villanueva (1994)
-#Used the lower bound of the range
+#Used the values from daily increment analysis
 
 Linf = 122.1
-to = -0.136
-K = 0.121
+to = 0.919
+K = 0.172
 
-#Equation from Dan's code
-corvina.age1 <- log(1-(pmin(corvina.all.2012$length_class, Linf*.99))/(-K)) + to
 
 #Equation from FAO 
 #(http://www.fao.org/docrep/w5449e/w5449e06.htm#4.4.5 the linearized catch curve based on length composition data)
 
-corvina.age2 <- to - (1/K) * log(1-corvina.all.2012$length_class/Linf)
+corvina.age <- to - (1/K) *log(1-corvina.all.2012$length_class/Linf)
 
-corvina.all.2012$age_class1 = corvina.age1
 
-corvina.all.2012$age_class2 = corvina.age2
+corvina.all.2012$age = corvina.age
+
+corvina.all.2012$age_class = trunc(corvina.age)
 
 ```
 
 ```{r plot_length_age}
-corvina.age.length <- unique(corvina.all.2012[,c('length_class','age_class2')]) %>%
+corvina.age.length <- unique(corvina.all.2012[,c('length_class','age')]) %>%
   dplyr::arrange(length_class)
 
 
-ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
+ggplot(data = corvina.age.length, aes(x=age, y=length_class)) +
   geom_point() +
   theme_minimal() +
-  labs(x = "Age years (age_class2)", y = "Length class (1 cm bins)")
+  labs(x = "Age years", y = "Length class (1 cm bins)")
 
 ```
 
@@ -90,7 +99,7 @@ ggplot(data = corvina.age.length, aes(x=age_class2, y=length_class)) +
 
 ```{r plot_age}
 
-p2<- ggplot(corvina.all.2012, aes(age_class2, fill=factor(label, levels =    unique(label)))) +
+p2<- ggplot(corvina.all.2012, aes(age, fill=factor(label, levels =    unique(label)))) +
     geom_histogram(binwidth = 1) +
     theme_minimal()+
     guides(fill=guide_legend(title="Month"))
@@ -111,13 +120,17 @@ $$\Delta t = t(L_2) - t(L_1) = \frac{1}{K} * ln\Big(\frac{L_{inf}-L_1}{L_{inf}-L
 L1.L2 <-vector(length=length(corvina.age.length$length_class))
 
 #Vector to identify if difference in length classes is greater than 1
-delta <- vector(length=length(corvina.age.length$length_class))
+#delta <- vector(length=length(corvina.age.length$length_class))
 
 #Vector of the time it takes to grow from L1 to L2
 D <- vector(length=length(corvina.age.length$length_class))
 
 #Vector for the x axis of linearized catch curve (I dont understand it conceptually yet)
 x <- vector(length=length(corvina.age.length$length_class))
+
+# Lx is the averge of length Li and L(i+1)
+Lx <- vector(length=length(corvina.age.length$length_class))
+
 
 for (i in 1:length(corvina.age.length$length_class)){
   
@@ -127,20 +140,23 @@ L2 <- corvina.age.length[(i+1),1]
   
 L1.L2[i] <-paste(L1, L2, sep="-") 
 
-delta[i] <- L2 - L1
+#delta[i] <- L2 - L1
 
 D[i] <- (1/K)*log((Linf-L1)/(Linf-L2))
  
   #this equation for D is the same as saying:
   #corvina.age.length[(i+1),2] - corvina.age.length[i,2]
 
-x[i] <- to - (1/K)*(log(1-((L1+L2)/(2*Linf))))
+# Lx is the averge of length Li and L(i+1)
+Lx[i] <- (L1+L2)/2
 
+#coverts Lx to age
+x[i] <- to - (1/K) * log(1-Lx[i]/Linf)
 
 
 }
 
-table <- data.frame(L1.L2, D, delta)
+table <- data.frame(L1.L2, D)
 
 ```
 
@@ -148,7 +164,7 @@ table <- data.frame(L1.L2, D, delta)
 
 ```{r plot_D, warning= FALSE}
 
-corvina.age.length$D <- D/delta
+corvina.age.length$D <- D  #/delta
 corvina.age.length$x <- x
 
 
@@ -156,16 +172,6 @@ ggplot(data = corvina.age.length, aes(x = length_class, y = D)) +
   geom_point() +
   theme_minimal() +
   labs(y="Time to next length class (D) ")
-
-```
-
-
-```{r show_D, fig.width=4}
-
-library(DT)
-datatable(table, options = list(
-                            pageLength = 5, 
-                            autoWidth = TRUE))
 
 ```
 
@@ -185,6 +191,10 @@ corvina.catch.curve<- corvina.all.2012.short[,4:5] %>%
 
 #adds age value (years) with matching length and annual count value
 corvina.catch.curve$age <- corvina.age.length$age_class2
+
+#we identified an error in the monthly length distribution data for Corvina at L = 55cm 
+#this is a manual correction of the sum of n(L=50)
+corvina.catch.curve[24, 2] = 38 
 
 #adds "delta t" - time to next length class
 
@@ -208,21 +218,36 @@ $$x = t\Big(\frac{L_1 + L_2}{2}\Big) = t_0 - \frac{1}{K} * ln\Big(1-\frac{L_{1}+
 
 $$y = ln\Big(\frac{C(L_1, L_2)}{\Delta t(L_1, L_2)}\Big)$$
 
-```{r test_plot_catch_curve}
+```{r test_plot_catch_curve, warning=FALSE}
+#Here the Z value is calculated without binning ages. 
+
 
 catch.curve.model <- lm(y~x, corvina.catch.curve)
 
 Z <- catch.curve.model$coefficients[2]
 
-SE <- 0.01756
+  
+  CI95 <- confint(catch.curve.model,x,  level = 0.95)
+  
+  Zerror <<- Z+CI95[1]
 
 ggplot(corvina.catch.curve, aes(x= x, y=y)) +
   geom_point()+
   stat_smooth(method = lm) +
   theme_minimal() +
-  annotate("text", x= 12, y= 6, label = paste("- Z = ", paste((round(Z, digits = 4)) , SE, sep = " ± ")))
+  annotate("text", x= 10, y= 6, label = paste("- Z = ", paste((round(Z, digits = 4)) ,  round(Zerror, digits = 3), sep = " ± ")))
   
   
 
 ```
 
+
+
+```{r catch_curve_DT, fig.width=4}
+
+library(DT)
+datatable(corvina.catch.curve, options = list(
+                            pageLength = 5, 
+                            autoWidth = TRUE))
+
+```
