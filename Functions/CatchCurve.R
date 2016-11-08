@@ -6,47 +6,53 @@
 #
 #LH <- VB Life history parameters Linf, K, to 
 
-CatchCurve <- function(LengthData, LH, ageBins){
-  LengthData= corvina.all.2012
+CatchCurve <- function(LengthData, LH){
+ LengthData= corvina.all.2012
   
-  Lengths <- LengthData$length_class
+#calculates Lc value as the mode of data
+  uniqv <- unique(LengthData$length_class)
+  Lc <- uniqv[which.max(tabulate(match(LengthData$length_class, uniqv)))]
   
   Linf <- LH$Linf
   
   K <- LH$K
   
   to <- LH$to
+ 
+#subsets data to only include lengths >= Lc 
+  Lengths <- LengthData$length_class[LengthData$length_class >= Lc]
   
   Ages <- to - (1/K) * log(1-Lengths/Linf)
   
-  ageBins = 1
+  ageBins = trunc(Ages)
   
-  br <- seq(from = round(min(Ages)), to=(max(Ages)+1), by = ageBins)
+  df <- plyr::count(ageBins)
   
-  #Age.freq <- as.data.frame(table(Ages)) %>%
-    freq   = hist(Ages, breaks = br, include.lowest=TRUE, plot=FALSE)
   
-  x <- freq$Ages
+  x <- df$x
   
-  y <- log(freq$counts)
+  y <- log(df$freq)
   
-Age.freq<-  data.frame(Age = head(br,-1), 
-                      lnCounts = log(freq$counts))
+
+  catch.curve.model <- lm(log(freq)~x, df)
   
-  catch.curve.model <- lm(Counts~Age, Age.freq)
+  Z <<- (catch.curve.model$coefficients[2])*(-1)
   
-  Z <- catch.curve.model$coefficients[2]
   
-  SE <- 0.01726
+  CI95 <- confint(catch.curve.model,x,  level = 0.95)
   
-p1<<- ggplot(Age.freq, aes(x= Age, y=Counts)) +
+  Zerror <<- Z+CI95[1]
+  
+p1<<- ggplot(df, aes(x= x, y=log(freq))) +
     geom_point()+
     stat_smooth(method = lm) +
     theme_minimal() +
-    annotate("text", x= 12, y= 6, label = paste("- Z = ", paste((round(Z, digits = 4)) , SE, sep = " ± ")))
+    annotate("text", x= 10, y= 6, label = paste(" Z = ", paste((round(Z, digits = 4)) , round(Zerror, digits = 3), sep = " ± ")))
  
 print(Z)
 
-Age.freq <<- Age.freq
+colnames(df) = c("AgeBins", "Count")
+
+Age.freq <<- df
    
 }
