@@ -7,7 +7,7 @@ output: html_document
 ##Setup
 
 ```{r setup, message=FALSE, warning=FALSE}
-
+rm(list=ls())
 
 library(dplyr)
 library(tidyr)
@@ -16,7 +16,9 @@ library(ggplot2)
 library(lubridate)
 library(plotly)
 
-```
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+``` 
 
 
 ```{r length_dist_2012}
@@ -32,6 +34,7 @@ corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2
 ```{r LH}
 
 LH <- as.data.frame(matrix(data = NA, nrow = 1, ncol = 3))
+  colnames(LH) = c("Linf", "to", "K")
 
 LH$Linf <- 122.1
 
@@ -45,6 +48,14 @@ LH$K <- 0.172
 ```{r}
 
 CatchCurve(corvina.all.2012, LH)
+
+
+M <- 0.3
+
+F <- Z-M 
+
+
+FFmsy <- F/M
 
 ```
 
