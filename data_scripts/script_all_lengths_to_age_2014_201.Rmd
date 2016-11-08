@@ -43,6 +43,8 @@ corvina.age <- to - (1/K) * log(1-corvina.all.2014$length_class/Linf)
 
 corvina.all.2014$age = corvina.age
 
+corvina.all.2014$age_class = trunc(corvina.age)
+
 
 ```
 
