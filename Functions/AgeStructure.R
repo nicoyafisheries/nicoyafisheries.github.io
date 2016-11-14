@@ -49,7 +49,7 @@ BHb <- 0.00089 #this is made up
   
   
 #Data-----
-Age <- seq(1,12,1)
+Age <- seq(1,18,1)
 Length <- Linf*(1-exp(-K*(Age-to)))
 Weight <- Wa*Length^Wb
 
@@ -72,7 +72,7 @@ N_at[1,1] = R0
 
 for (t in 2:NumYears){
   
-  for (a in 1:11){
+  for (a in 1:17){
   
   #  Set inital condition in year t = 0 (assumes no fishing)
     N_at[1,a+1] = N_at[1,(a)]*(1-M)
