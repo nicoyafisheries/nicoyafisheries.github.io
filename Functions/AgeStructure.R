@@ -14,7 +14,7 @@ rm(list=ls())
 
 
 #Set Model----
-NumYears = 100
+NumYears = 10
 
 R0 = 10000
 
@@ -60,6 +60,8 @@ Ma =  1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
 
 fa <- Weight*.001
 
+Price <- c(100,500,1000)
+
 #Data Structures----  
 N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))
 colnames(N_at) = as.character(c(Age))
@@ -67,6 +69,9 @@ colnames(N_at) = as.character(c(Age))
 delta_Nt <- data.frame(matrix(data = NA, ncol = 2, nrow = NumYears))
 colnames(delta_Nt) <- c('Recruitment',
                         'Catch')
+
+Revenue <- data.frame(matrix(data = NA, ncol = max(Age+1), nrow = NumYears))
+colnames(Revenue) = as.character(c(Age,'Total'))
 
 N_at[1,1] = R0
 
@@ -86,8 +91,18 @@ for (t in 2:NumYears){
     
     delta_Nt$Recruitment[t] = sum(N_at[t,]*fa*Ma)
     
+  # Calculate revenue in year t
+    if (a-1 < 2){
+      Revenue[t,a] = Weight[a]*N_at[t,a]*Price[1]
+      
+    } else if (a > 2 & a < 6){
+      Revenue[t,a] = Weight[a]*N_at[t,a]*Price[2]
+      
+    } else {
+      Revenue[t,a] = Weight[a]*N_at[t,a]*Price[3]
+    }
+    
+Revenue$Total[t] = sum(Revenue[t,1:max(Age)])    
   }
 }
-
-
 
