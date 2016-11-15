@@ -13,7 +13,7 @@ Deterministic Age-Stuctured Model
  *Va* - vulnerability to fishing at Age = a  
  *Ma* - Maturity at Age = a  
  *fa* - fecundity at Age = a  
- *M*- nautal mortality  
+ *M*- natural mortality  
  *F* - fishing mortality  
 
 ##Output
@@ -65,10 +65,10 @@ BHb <- 0.00089 #this is made up
   
 ```
 
-##Vulnerabiltity to fishery
+###Vulnerabiltity to fishery
 $$Va = \frac{1}{1-e^{-ln(19)\frac{L_1 - S_{50}}{S_{95} - S_{50}}}}$$
 
-##Probability of being mature
+###Probability of being mature
 $$Ma = \frac{1}{1-e^{-ln(19)\frac{L_1 - m_{50}}{m_{95} - m_{50}}}}$$
 
 
@@ -110,8 +110,10 @@ colnames(Revenue) =c('small',
 
 ```
 
-$$Z_a = M + S_aF $$
-##Abundance N of age *a* in time *t*
+### Instantaneous mortality (*Z*)
+$$Z_a = M + V_aF $$
+
+###Abundance N of age *a* in time *t*
 
 \usepackage{amsmath}
 ...
@@ -123,7 +125,8 @@ R_t, & \text{if }a=0 \\
 N_{a-1,t-1} e^{Z_{a-1}}, & \text{if }0<a \leq a_{max}
 \end{cases}
 $$
-##Catch C of age *a* in time *t*
+
+###Catch C of age *a* in time *t*
 
 $$C_{a,t} = \frac{F_a}{Z_a}N_{a,t}(1-e^{-Z_a}) $$
 
