@@ -61,7 +61,7 @@ F <- 0.3125
 
 BHa <- 0.546 #this is made up
   
-BHb <- 0.00089 #this is made up
+BHb <- 0.000089 #this is made up
   
 ```
 
