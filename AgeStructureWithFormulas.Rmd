@@ -12,7 +12,7 @@ Deterministic Age-Stuctured Model
  *BHb* - Beverton Holt beta  
  *Va* - vulnerability to fishing at Age = a  
  *Ma* - Maturity at Age = a  
- *fa* - fecundity at Age = a  
+ *fa* - fecundity at Age = a  (weight of individual * number of eggs produced per gram )
  *M*- natural mortality  
  *F* - fishing mortality  
 
@@ -28,7 +28,7 @@ rm(list=ls())
 
 
 #Set Model----
-NumYears = 50
+NumYears = 25
 
 R0 = 10000
 
@@ -44,24 +44,24 @@ Wa = 0.3
   
 Wb = 2.824
   
-
+#Length (cm) at which a fish is 50/95 percent vulnerable to fishing mortality
 S50 = 26
 
 S95 = 29
 
-
+#Length (cm) at which a fish is 50/95 percent likely to be mature
 m50 = 55
 
 m95 = 62.7
 
 #Natural mortality
-M <- 0.3
+M <- 0.258
 
-F <- 0.35
+F <- 0.3125
 
 BHa <- 0.546 #this is made up
   
-BHb <- 0.00089 #this is made up
+BHb <- 0.000089 #this is made up
   
 ```
 
@@ -78,6 +78,8 @@ $$Ma = \frac{1}{1-e^{-ln(19)\frac{L_1 - m_{50}}{m_{95} - m_{50}}}}$$
 Age <- seq(1,18,1)
 
 Length <- Linf*(1-exp(-K*(Age-to)))
+
+#Converts lengths (cm) to weight (g)
 Weight <- Wa*Length^Wb
 
 
@@ -85,10 +87,12 @@ Va = 1/(1 + exp(-log(19)*((Length - S50)/(S95 - S50))))
 
 Ma =  1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
 
-fa <- Weight*.001
+#fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
 
 #Price per kg is dependent on size of fish
-Price <- c(100,500,1000)
+Price <- c(10,50,100)
 ```
 
 
@@ -164,8 +168,15 @@ for (t in 2:NumYears){
 
 ```{r ugly_plot_N}
 
-plot(Age, N_at[NumYears,], ylab = "Number of Individuals")
+df.hist = stack(N_at[NumYears, ])
 
+barplot(df.hist$values, names.arg = df.hist$ind)
+
+CatchCurve <- lm(log(values) ~ ind, data = df.hist)
+
+Z.est = -CatchCurve$coefficients[2]
+
+print(Z.est)
 ```
 
 
@@ -188,6 +199,7 @@ for (t in 1:NumYears){
 
 
 ```{r ugly_plot_Rev}
+print(Revenue$total[NumYears])
 
 plot(Revenue$total, xlab = "time", ylab = 'Revenue')
 
