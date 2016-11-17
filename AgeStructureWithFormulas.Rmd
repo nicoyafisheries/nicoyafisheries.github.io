@@ -2,12 +2,12 @@
 title: "R Notebook"
 output: html_notebook
 ---
-Deterministic Age-Stuctured Model
+##Deterministic Age-Stuctured Model
 
-##Parameters
- *Linf* - Von Bertalanffy L infinity  
+###Parameters
+ *Linf* - Von Bertalanffy asymptotic length
  *K* - Von Bertalanffy growth parameter  
- *to* - Von Bertalanffy theoretical length of fish age 0  
+ *to* - Von Bertalanffy theoretical theoretical age when length is zero  
  *BHa* - Beverton Holt alpha  
  *BHb* - Beverton Holt beta  
  *Va* - vulnerability to fishing at Age = a  
@@ -16,7 +16,7 @@ Deterministic Age-Stuctured Model
  *M*- natural mortality  
  *F* - fishing mortality  
 
-##Output
+###Output
  N_at <- dataframe of number of individuals for every age a (cols) at time t (rows)
  
  Catch <- dataframe of number of individuals caought for every age a (cols) at time t (rows)
@@ -30,7 +30,7 @@ rm(list=ls())
 #Set Model----
 NumYears = 25
 
-R0 = 10000
+R0 = 100
 
 ```
 
@@ -57,13 +57,21 @@ m95 = 62.7
 #Natural mortality
 M <- 0.258
 
+#Fishing mortality
 F <- 0.3125
+
+#Spawners per Recruit
+
+h <- 0.7
+
 
 BHa <- 0.546 #this is made up
   
 BHb <- 0.000089 #this is made up
   
 ```
+
+Size-depemdent two-parameter logistic function for vulnerability and maturity
 
 ###Vulnerabiltity to fishery
 $$Va = \frac{1}{1-e^{-ln(19)\frac{L_1 - S_{50}}{S_{95} - S_{50}}}}$$
@@ -87,9 +95,10 @@ Va = 1/(1 + exp(-log(19)*((Length - S50)/(S95 - S50))))
 
 Ma =  1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
 
-#fecundity - produce about 41 eggs per gram 
+#realtive fecundity - corvina produce about 41 eggs per gram 
 #SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
-fa <- Weight*41
+fa <- 41*Weight
+
 
 #Price per kg is dependent on size of fish
 Price <- c(10,50,100)
