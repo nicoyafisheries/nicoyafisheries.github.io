@@ -1,0 +1,54 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r setup, message=FALSE, warning=FALSE, include=FALSE}
+
+rm(list=ls())
+
+pkgs <- c( 'ggplot2','tidyr', 'reshape', 'dplyr', 'lubridate', 'plotly')
+
+#This will install necessary packages on local machine
+load.packages = function(a){
+  if(!require(a, character.only = TRUE)){
+    install.packages(a)
+    library(a, character.only = TRUE)
+  }
+}
+
+lapply(pkgs, load.packages)
+
+
+```
+
+
+```{r length_dist_2012}
+
+corvina.all.2012.short<- read.csv('./data/RAW/Length_2012/corvina_length_monthly_2012.csv') 
+corvina.all.2012.short$date = as.Date(corvina.all.2012.short$date, "%m/%d/%y")
+
+
+corvina.all.2012 <- untable(corvina.all.2012.short[ , c(1,4)], num=corvina.all.2012.short[ ,5]) %>%
+  mutate(label = month.abb[month(date)])
+
+```
+
+
+```{r}
+
+MLE <- MASS::fitdistr(corvina.all.2012$length_class, densfun = "Poisson")
+
+predict <- ppois(q=50, lambda= as.numeric(MLE$estimate))
+
+plot(corvina.all.2012$length_class, predict, type = "s", ylab = "F(x)", main = "Poisson(1) CDF")
+```
+
+```{r}
+summary(corvina.all.2012$length_class)
+
+quantile(corvina.all.2012$length_class)
+  
+quantile(corvina.all.2012$length_class, probs=c(.5, .95))
+
+```
+
