@@ -40,7 +40,9 @@ newframe[,13] = seq(1,12)
 colnames(newframe) = c(as.character(seq(1,12)),'t')
 
 library(tidyr)
-newframe = gather(newframe,"Age", "n", 1:12 )
+newframe = gather(newframe,"Age", "n", 1:12 ) 
+
+newframe = newframe[, c(2,1,3)]
 
 ```
 
@@ -55,10 +57,13 @@ library(dplyr)
 
 # must set this option for googleVis charts to show up
 op <- options(gvis.plot.tag='chart')
+```
 
 
 
-C= gvisMotionChart(newframe, idvar='Age', timevar = 't', options=list(width=600,    height=500), sizevar = 'n')
+```{r}
+
+C= gvisMotionChart(newframe, idvar='Age', timevar = 't',  sizevar = 'n')
 
 plot(C)
 
