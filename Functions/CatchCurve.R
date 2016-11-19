@@ -46,6 +46,7 @@ CatchCurve <- function(LengthData, LH){
 p1<<- ggplot(df, aes(x= x, y=log(freq))) +
     geom_point()+
     stat_smooth(method = lm) +
+    labs(x= 'Age', y = "ln(Age Frequency)")+
     theme_minimal() +
     annotate("text", x= 10, y= 6, label = paste(" Z = ", paste((round(Z, digits = 4)) , round(Zerror, digits = 3), sep = " ± ")))
  

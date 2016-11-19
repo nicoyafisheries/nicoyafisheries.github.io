@@ -144,6 +144,24 @@ N_{a-1,t-1} e^{Z_{a-1}}, & \text{if }1<a \leq a_{max}
 \end{cases}
 $$
 
+
+
+\usepackage{amsmath}
+...
+...
+$$
+Revenue{} =
+\begin{cases}
+\sum N_{a} w_{a}P_1 , & \text{if }1<a \leq 3 \\
+\sum_{a=4}^6N_{a} w_{a}P_2 , & \text{if }3<a \leq 6 \\
+\sum_{a=4}^AN_{a} w_{a}P_3, & \text{if }1<a \leq a_{max}
+\end{cases}
+$$
+$$ Revenue =\sum_{a=1}^3N_{a} w_{a}P_1 + \sum_{a=4}^6N_{a} w_{a}P_2 + \sum_{a=4}^AN_{a} w_{a}P_3$$
+
+
+
+
 ###Catch C of age *a* in time *t*
 
 $$C_{a,t} = \frac{F_a}{Z_a}N_{a,t}(1-e^{-Z_a}) $$

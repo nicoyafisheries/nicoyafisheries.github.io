@@ -214,8 +214,10 @@ Results[s,21] = Revenue$total[NumYears]
 ```{r}
 library(ggplot2)
 
-Lc.Catch = ggplot(Results, aes(x=Lc, y= Total.Catch)) +
+# Lc.Catch = 
+  ggplot(Results, aes(x=Lc, y= Total.Catch)) +
               geom_jitter() +
+              labs(x="Gear Selectivity (Length at first capture)", y = "Annual Total Catch at Equilibirum" ) +
               theme_minimal()
           
 ```
@@ -223,9 +225,12 @@ Lc.Catch = ggplot(Results, aes(x=Lc, y= Total.Catch)) +
 
 ```{r}
 
-
-Lc.Rev = ggplot(Results, aes(x=Lc, y= Total.Revenue)) +
+# 
+# Lc.Rev =
+  
+  ggplot(Results, aes(x=Lc, y= Total.Revenue)) +
               geom_jitter() +
+              labs(x="Gear Selectivity (Length at first capture)", y = "Annual Total Revenue at Equilibirum" ) +
               theme_minimal()
           
 ```
@@ -239,6 +244,29 @@ Lc.price = ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
               geom_jitter() +
               theme_minimal()
           
+```
+
+
+
+
+
+
+
+
+```{r}
+# Revenue$Lc = seq(1:length(Revenue$small)) 
+# 
+# Revbar = gather(Revenue[, c(1:3,5)],'Size.Class' ,'Revenue', 1:3)
+# 
+# 
+# library(ggplot2)
+# 
+# 
+# ggplot(Revbar, aes(x= Lc, y= Revenue, fill =factor(Size.Class ))) +
+#   geom_bar(stat="identity",position = "stack")
+# 
+
+#
 ```
 
 ```{r ugly_plot_N}
