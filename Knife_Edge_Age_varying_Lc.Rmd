@@ -240,6 +240,7 @@ library(ggplot2)
 ```{r}
 
 
+
 ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
               geom_jitter() +
               theme_minimal()
@@ -249,6 +250,17 @@ ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
 
 
 
+
+```{r}
+
+
+Results$Total.Abundance = apply(Results[2:19],1, sum)
+   
+ggplot(Results, aes(x=Total.Abundance, y= Total.Catch)) +
+              geom_jitter() +
+              theme_minimal()
+          
+```
 
 
 
