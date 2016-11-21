@@ -80,8 +80,8 @@ Ma = ifelse(Length < m, 0, 1)
 #SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
 fa <- Weight*41
 
-#Price per kg is dependent on size of fish
-Price <- c(10,50,80)
+#Price per USD per kg is dependent on size of fish
+Price <- c(0.71,3.25,4.31)
 ```
 
 
@@ -191,11 +191,11 @@ Catch[1,] = 0
      
      #Calculate Revenue by commercial class
      
-      Revenue[t,1] = sum(Weight[1:2]*Catch[t,1:2]*Price[1])
+      Revenue[t,1] = sum(Weight[1:2]*Catch[t,1:2]*Price[1]/1000)
       
-      Revenue[t,2] = sum(Weight[3:5]*Catch[t,3:5]*Price[2])
+      Revenue[t,2] = sum(Weight[3:4]*Catch[t,3:4]*Price[2]/1000)
       
-      Revenue[t,3] = sum(Weight[5:max(Age)]*Catch[t,5:max(Age)]*Price[3])
+      Revenue[t,3] = sum(Weight[5:max(Age)]*Catch[t,5:max(Age)]*Price[3]/1000)
       
       Revenue[t,4] = sum(Revenue[t,1:3])
           
