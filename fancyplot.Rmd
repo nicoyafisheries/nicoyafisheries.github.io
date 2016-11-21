@@ -1,0 +1,73 @@
+```{r}
+RAW <- read.csv('AgeStructureInitial.csv', header = TRUE) 
+
+
+
+d= RAW[1,2:19]
+  
+newframe <- data.frame(matrix(data = 0, ncol = 13 , nrow = 12))
+```
+
+```{r}
+newframe[,1] = d[1]
+
+newframe[2:12,2] = d[2]
+
+newframe[3:12,3] = d[3]
+
+newframe[4:12,4] = d[4]
+
+newframe[5:12,5] = d[5]
+
+newframe[6:12,6] = d[6]
+
+newframe[7:12,7] = d[7]
+
+newframe[8:12,8] = d[8]
+
+newframe[9:12,9] = d[9]
+
+newframe[10:12,10] = d[10]
+
+newframe[11:12,11] = d[11]
+
+newframe[12:12,12] = d[12]
+
+
+newframe[,13] = seq(1,12)
+
+
+colnames(newframe) = c(as.character(seq(1,12)),'t')
+
+library(tidyr)
+newframe = gather(newframe,"Age", "n", 1:12 ) 
+
+newframe = newframe[, c(2,1,3)]
+
+```
+
+```{r ,results='asis'}
+suppressPackageStartupMessages({
+  library(googleVis)  # install.packages('googleVis')
+})
+library(readr)
+library(plyr)
+library(dplyr)
+
+
+# must set this option for googleVis charts to show up
+op <- options(gvis.plot.tag='chart')
+```
+
+
+
+```{r ,results='asis'}
+
+C= gvisMotionChart(newframe, idvar='Age', timevar = 't', sizevar = 'n', options = list('{"xZoomedDataMin":0,"orderedByX":true,"orderedByY":false,"xZoomedIn":false,"yZoomedDataMax":100,"iconType":"VBAR","yZoomedIn":false,"xLambda":1,"showTrails":false,"iconKeySettings":[],"uniColorForNonSelected":false,"duration":{"multiplier":1,"timeUnit":"Y"},"yZoomedDataMin":0,"yLambda":1,"colorOption":"_UNIQUE_COLOR","dimensions":{"iconDimensions":["dim0"]},"xAxisOption":"2","time":"1901","nonSelectedAlpha":0.4,"xZoomedDataMax":12,"yAxisOption":"2","playDuration":15000,"sizeOption":"_UNISIZE"}'))
+
+plot(C)
+
+
+
+```
+

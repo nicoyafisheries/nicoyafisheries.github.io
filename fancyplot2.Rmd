@@ -1,0 +1,34 @@
+```{r}
+library(tidyverse)
+
+RAW <- read.csv('AgeStructureInitial.csv', header = TRUE)
+
+colnames(RAW) = c('t',as.character(seq(1,18)))
+
+full.Abundance = gather(RAW,"Age", "n" ,2:19) 
+
+```
+
+
+
+```{r ,results='asis'}
+suppressPackageStartupMessages({
+  library(googleVis)  # install.packages('googleVis')
+})
+
+
+
+# must set this option for googleVis charts to show up
+op <- options(gvis.plot.tag='chart')
+```
+
+
+```{r ,results='asis'}
+
+C= gvisMotionChart(full.Abundance, idvar='Age', timevar = 't', sizevar = 'n')
+
+plot(C)
+
+
+
+```
