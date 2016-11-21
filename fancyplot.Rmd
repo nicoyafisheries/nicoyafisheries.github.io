@@ -63,7 +63,7 @@ op <- options(gvis.plot.tag='chart')
 
 ```{r ,results='asis'}
 
-C= gvisMotionChart(newframe, idvar='Age', timevar = 't', sizevar = 'n')
+C= gvisMotionChart(newframe, idvar='Age', timevar = 't', sizevar = 'n', options = list('{"xZoomedDataMin":0,"orderedByX":true,"orderedByY":false,"xZoomedIn":false,"yZoomedDataMax":100,"iconType":"VBAR","yZoomedIn":false,"xLambda":1,"showTrails":false,"iconKeySettings":[],"uniColorForNonSelected":false,"duration":{"multiplier":1,"timeUnit":"Y"},"yZoomedDataMin":0,"yLambda":1,"colorOption":"_UNIQUE_COLOR","dimensions":{"iconDimensions":["dim0"]},"xAxisOption":"2","time":"1901","nonSelectedAlpha":0.4,"xZoomedDataMax":12,"yAxisOption":"2","playDuration":15000,"sizeOption":"_UNISIZE"}'))
 
 plot(C)
 
