@@ -132,6 +132,8 @@ $$
 $$C_{a,t} = \frac{F_a}{Z_a}N_{a,t}(1-e^{-Z_a}) $$
 
 
+$$ Revenue =\sum_{a=1}^3N_{a} w_{a}P_1 + \sum_{a=4}^6N_{a} w_{a}P_2 + \sum_{a=6}^AN_{a} w_{a}P_3$$
+
 ```{r Generate Population Data}
 
 
