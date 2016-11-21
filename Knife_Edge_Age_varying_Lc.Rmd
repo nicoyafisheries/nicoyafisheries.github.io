@@ -36,7 +36,7 @@ Linf = 122.1
 K = 0.172
 to = 0.919
   
-Wa = 0.3
+Wa = 0.024
   
 Wb = 2.824
   
@@ -177,7 +177,7 @@ Catch[1,] = 0
           
          #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t
           
-           Catch[t,a+1] = N_at[(t),(a+1)]*(1 - exp(-M - Va[a+1]*F))
+           Catch[t,a+1] = ((Va[a+1]*F)/(Va[a+1]*F+M))*N_at[(t),(a+1)]*(1 - exp(-M - Va[a+1]*F))
           
            Catch[t,1] = 0
           
@@ -240,7 +240,7 @@ library(ggplot2)
 ```{r}
 
 
-Lc.price = ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
+ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
               geom_jitter() +
               theme_minimal()
           
