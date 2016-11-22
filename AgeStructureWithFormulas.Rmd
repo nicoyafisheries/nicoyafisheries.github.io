@@ -29,9 +29,9 @@ rm(list=ls())
 library(tidyverse)
 
 #Set Model----
-NumYears = 25
+NumYears = 100
 
-R0 = 100
+R0 = 1000
 
 ```
 
@@ -67,11 +67,11 @@ F <- 0.3125
 
 #h <- 0.7
 
-
-BHa <- 0.546 #this is made up
-
-BHb <- 0.000089 #this is made up
-
+# BHa <- 054.6 #this is made up
+# 
+# BHb <- 0.0089 #this is made up
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
 ```
 
 Size-depemdent two-parameter logistic function for vulnerability and maturity
@@ -112,7 +112,7 @@ Price <- c(10,50,100)
 N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))
 colnames(N_at) = as.character(c(Age))
 
-Recruitment <- vector(length = NumYears)
+Eggs <- vector(length = NumYears)
 
 Catch <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears))
 colnames(Catch) <- as.character(c(Age,'Total'))
@@ -183,15 +183,17 @@ for (a in 1:17){
 
 
 
-#Recruitment in year 1
-Recruitment[1] = sum(N_at[1,]*fa*Ma)
+#Eggs in year 1
+Eggs[1] = sum(N_at[1,]*fa*Ma)
+
+phi <- Eggs[1]
 
 Catch[1,] = 0
 
 
 for (t in 2:NumYears) {
   
-  N_at[t,1] = Recruitment[t - 1] / (BHa + BHb*Recruitment[t - 1])
+  N_at[t,1] = (0.8*R0*h*Eggs[t-1])/(0.2*phi*(1-h)+(h-0.2)*Eggs[t-1])
 
   for (a in 1:17) {
   
@@ -209,7 +211,7 @@ for (t in 2:NumYears) {
     
   }
   
- Recruitment[t] = sum(N_at[t,]*fa*Ma)
+ Eggs[t] = sum(N_at[t,]*fa*Ma)
       
 }
 
