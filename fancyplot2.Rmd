@@ -25,7 +25,7 @@ op <- options(gvis.plot.tag='chart')
 
 ```{r ,results='asis'}
 
-C= gvisMotionChart(full.Abundance, idvar='Age', timevar = 't', sizevar = 'n')
+C= gvisMotionChart(full.Abundance, idvar='Age', timevar = 't', sizevar = 'n', xvar = 't', yvar = 'n')
 
 plot(C)
 
