@@ -4,12 +4,14 @@ rm(list=ls())
 
 library(tidyverse)
 
-RAW <- read.csv('AgeStructureInitial.csv', header = TRUE) %>%
+RAW <- read.csv('AgeStructureInitial.csv', header = TRUE, stringsAsFactors = FALSE) %>%
   mutate(t = seq(1,100,1))
 
 colnames(RAW) = c('t',as.character(seq(1,18)))
 
 full.Abundance = gather(RAW,"Age", "n" ,2:19) 
+
+full.Abundance$t = as.numeric(full.Abundance$t)
 
 ```
 
