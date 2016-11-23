@@ -73,7 +73,7 @@ Length <- Linf*(1-exp(-K*(Age-to)))
 Weight <- Wa*Length^Wb
 
 #Length at first capture
-Lc = seq(20, 100, 3 )
+Lc = seq(15, 115, 2 )
 
 #Maturity
 Ma = ifelse(Length < m, 0, 1)
@@ -229,15 +229,19 @@ library(ggplot2)
 ```
 
 
-```{r}
+```{r plot_revenue}
 
 # 
 # Lc.Rev =
   
   ggplot(Results, aes(x=Lc, y= Total.Revenue)) +
               geom_jitter() +
-              labs(x="Gear Selectivity (Length at first capture)", y = "Annual Total Revenue at Equilibirum" ) +
-              theme_minimal()
+              geom_smooth(se = FALSE, col = "darkblue") +
+              scale_x_continuous(limits=c(min(Lc),max(Lc)), breaks=seq(15, 115, 10)) +
+              labs(x="Gear Selectivity (Length at first capture)", y = "Annual Revenue at Equilibirum" ) +
+              theme_minimal() +            
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black"))
+             
           
 ```
 

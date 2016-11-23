@@ -22,11 +22,12 @@ Deterministic Age-Stuctured Model with Knife-edge selectivity
 ```{r setup}
 rm(list=ls())
 
+library(colorRamps)
 
 #Set Model----
 NumYears = 40
 
-R0 = 10
+R0 = 1000
 
 ```
 
@@ -71,9 +72,9 @@ Length <- Linf*(1-exp(-K*(Age-to)))
 Weight <- Wa*Length^Wb
 
 #Length at first capture
-Lc = seq(20, 100, 4 )
+Lc = seq(15, 100, 2 )
 
-F = seq(0,1, 0.05) 
+F = seq(0,1, 0.025) 
 
 #Maturity
 Ma = ifelse(Length < m, 0, 1)
@@ -114,6 +115,10 @@ colnames(TEMP) <- as.character(c('F','Lc', Age,'Total.Catch','Total.Revenue'))
 
 
 Results.Rev <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc)))
+
+Results.Biomass <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc)))
+
+Results <- list(Rev = Results.Rev, Biomass = Results.Biomass)
 
 ```
 
@@ -162,6 +167,9 @@ for (a in 1:17){
 for (f in 1:length(F)){
 
   for (s in 1:length(Lc)) {
+    print(F[f])
+    
+    print(Lc[s])
     
   Va = ifelse(Length < Lc[s], 0, 1)
   
@@ -217,7 +225,10 @@ for (f in 1:length(F)){
   
   TEMP[s,21] = Revenue$total[NumYears]
   
- Results.Rev[s,f] <- TEMP[s,21]
+ Results$Rev[s,f] <- TEMP[s,21]
+ 
+ Results$Biomass[s,f] <- sum(TEMP[s,2:19]*Weight)
+ 
     }
   
 
@@ -226,11 +237,11 @@ for (f in 1:length(F)){
 
 ```
 
-```{r}
+```{r heatmap_Revenue}
 
-rownames(Results.Rev) = as.character(Lc)
+rownames(Results$Rev) = as.character(Lc)
 
-mat.Revenue = as.matrix(Results.Rev)
+mat.Revenue = as.matrix(Results$Rev)
 colnames(mat.Revenue) = as.character(F)
 
 #heatmaply::heatmaply(mat.Revenue,  xlab = "Fishing Mortality (F)", ylab = "Selectivity")
@@ -241,12 +252,46 @@ colnames(mat.Revenue) = as.character(F)
 
 filled.contour(y = F,
                x = Lc,
-               z = mat.Revenue)
+               z = mat.Revenue,
+              col = rev(matlab.like(19)),               
+              plot.title = title(main = "Fishing Revenues",
+                            xlab = "Gear Selectivity (Length at first capture)", 
+                            ylab = "Fishing Pressure (F)"))
 
 ```
 
+```{r heatmap_Biomass}
 
-```{r}
+rownames(Results$Biomass) = as.character(Lc)
+
+mat.Biomass = as.matrix(Results$Biomass)
+colnames(mat.Biomass) = as.character(F)
+
+#heatmaply::heatmaply(mat.Revenue,  xlab = "Fishing Mortality (F)", ylab = "Selectivity")
+ 
+
+filled.contour(y = Lc,
+               x = F,
+               z = t(mat.Biomass),
+              col = rev(matlab.like(23)),
+              plot.title = title(main = "Biomass at Equilibrium",
+                            ylab = "Gear Selectivity (Length at first capture)",
+                            xlab = "Effort (Fishing Mortality)"))
+#hm = heatmap(mat.Revenue, Rowv = NA, Colv = NA, labRow = as.character(Lc))
+# 
+# image(y = F,
+#                x = Lc,
+#                z = mat.Biomass,
+#               plot.title = title(main = "Equilibrium Biomass",
+#                             xlab = "Gear Selectivity (Length at first capture)", 
+#                             ylab = "Fishing Pressure (F)"))
+# contour(y = F,
+#                x = Lc,
+#                z = mat.Revenue, add = TRUE, )
+
+```
+
+```{r eval=FALSE}
 library(ggplot2)
 
 # Lc.Catch = 
@@ -258,7 +303,7 @@ library(ggplot2)
 ```
 
 
-```{r}
+```{r eval=FALSE}
 
 # 
 # Lc.Rev =
@@ -272,13 +317,27 @@ library(ggplot2)
 
 
 
-```{r}
+```{r schaffer_plot}
 
+Actual.Rev = t(Results$Rev[5,])
 
+schaffer.data <- data.frame(mortality = F, 
+                            revenue = Actual.Rev)
 
-ggplot(TEMP, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
-              geom_jitter() +
-              theme_minimal()
+colnames(schaffer.data) <- c("mortality", "revenue")
+
+c = schaffer.data[13,2]/schaffer.data[13,1]
+
+ggplot(schaffer.data, aes(x = mortality, y = revenue )) +
+              geom_point(color="darkblue") +
+              geom_line(color="darkblue", size=1, show.legend = TRUE) +
+              #geom_smooth(se =FALSE) +
+              geom_vline(xintercept = schaffer.data[13,1], lty = 2) +
+              geom_hline(yintercept = schaffer.data[13,2], lty = 2) +
+              geom_abline(intercept = 0 , slope = c, color = "red", , size=1, show.legend = TRUE) +
+              labs(x = "Effort (fishing mortality)", y = "Dollars") +
+              theme_minimal() +
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
           
 ```
 
@@ -286,15 +345,25 @@ ggplot(TEMP, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
 
 
 
-```{r}
+```{r heatmap_profit}
+
+Costs = c*F
+
+Results$Profit <- apply(Results$Rev , 1, '-', Costs)
 
 
-TEMP$Total.Abundance = apply(TEMP[2:19],1, sum)
-   
-ggplot(TEMP, aes(x=Total.Abundance, y= Total.Catch)) +
-              geom_jitter() +
-              theme_minimal()
-          
+ lvls <- seq(min(Results$Profit), max(Results$Profit), length.out = 70)
+
+filled.contour(x = F,
+               y = Lc,
+               z = Results$Profit,
+               col = rev(matlab.like(15)),
+               #levels=lvls,
+               plot.title = title(main = "Profit",
+                            ylab = "Gear Selectivity (length at first capture)", 
+                            xlab = "Effort (Fishing Mortality)"))
+
+
 ```
 
 

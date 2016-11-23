@@ -33,10 +33,14 @@ Bev.Holt_SPR <- function(R0, M, fa, Ma){
   
   }
   
+  Egg.Output <<- Egg.Output
+  
+  return(plot((Egg.Output/Egg.Output[11]), (R/R0), ylab = "Recruitment/R0", xlab = "Egg Output/E0"))
+  
 }
 
 
-plot((Egg.Output/Egg.Output[11]), (R/R0), ylab = "Recruitment/R0", xlab = "Egg Output/E0")
+
 
 
 # SPR0 <- sum(N_at[1,]*fa*Ma)
