@@ -11,7 +11,7 @@ colnames(RAW) = c('t',as.character(seq(1,18)))
 
 full.Abundance = gather(RAW,"Age", "n" ,2:19) 
 
-full.Abundance$t = as.numeric(full.Abundance$t)
+full.Abundance$t = as.numeric(full.Abundance$t) + 2000
 
 ```
 
