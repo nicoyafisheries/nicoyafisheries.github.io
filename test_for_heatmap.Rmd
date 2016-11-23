@@ -337,8 +337,12 @@ ggplot(schaffer.data, aes(x = mortality, y = revenue )) +
               geom_abline(intercept = 0 , slope = c, color = "red", , size=1, show.legend = TRUE) +
               labs(x = "Effort (fishing mortality)", y = "Dollars") +
               theme_minimal() +
-              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-          
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
+              theme(axis.text.x = element_text(size=17),
+                    axis.text.y = element_text(size=17),
+                    axis.title.x = element_text(size=18),
+                    axis.title.y = element_text(size=18))
+              
 ```
 
 
