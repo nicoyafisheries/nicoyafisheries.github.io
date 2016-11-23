@@ -3,6 +3,8 @@ library(tidyverse)
 
 RAW <- read.csv('AgeStructureInitial.csv', header = TRUE)
 
+RAW<- RAW[1:99,]
+
 colnames(RAW) = c('t',as.character(seq(1,18)))
 
 full.Abundance = gather(RAW,"Age", "n" ,2:19) 
