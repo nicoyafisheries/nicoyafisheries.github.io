@@ -50,7 +50,7 @@ m = 55
 #Natural mortality
 M <- 0.258
 
-F <- 0.15
+F <- 0.315
 
 # BHa <- 054.6 #this is made up
 # 
@@ -240,20 +240,12 @@ library(ggplot2)
               scale_x_continuous(limits=c(min(Lc),max(Lc)), breaks=seq(15, 115, 10)) +
               labs(x="Gear Selectivity (Length at first capture)", y = "Annual Revenue at Equilibirum" ) +
               theme_minimal() +            
-              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black"))
+              theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
+              theme(axis.text.x = element_text(size=17),
+                    axis.text.y = element_text(size=17),
+                    axis.title.x = element_text(size=18),
+                    axis.title.y = element_text(size=18))
              
-          
-```
-
-
-
-```{r}
-
-
-
-ggplot(Results, aes(x=Lc, y= (Total.Revenue/Total.Catch))) +
-              geom_jitter() +
-              theme_minimal()
           
 ```
 
@@ -273,51 +265,3 @@ ggplot(Results, aes(x=Total.Abundance, y= Total.Catch)) +
 ```
 
 
-
-
-```{r}
-# Revenue$Lc = seq(1:length(Revenue$small)) 
-# 
-# Revbar = gather(Revenue[, c(1:3,5)],'Size.Class' ,'Revenue', 1:3)
-# 
-# 
-# library(ggplot2)
-# 
-# 
-# ggplot(Revbar, aes(x= Lc, y= Revenue, fill =factor(Size.Class ))) +
-#   geom_bar(stat="identity",position = "stack")
-# 
-
-#
-```
-
-```{r ugly_plot_N}
-
-# df.hist = stack(N_at[NumYears, ])
-# 
-# barplot(df.hist$values, names.arg = df.hist$ind)
-# 
-# CatchCurve <- lm(log(values) ~ ind, data = df.hist)
-# 
-# Z.est = -CatchCurve$coefficients[2]
-# 
-# print(Z.est)
-```
-
-
-```{r Revenue}
-
-#Calculate Revenue by commercial class------
-
-# for (t in 1:NumYears){
-# 
-#   Revenue[t,1] = sum(Weight[1:2]*Catch[t,1:2]*Price[1])
-#   
-#   Revenue[t,2] = sum(Weight[3:5]*Catch[t,3:5]*Price[2])
-#   
-#   Revenue[t,3] = sum(Weight[5:max(Age)]*Catch[t,5:max(Age)]*Price[3])
-#   
-#   Revenue[t,4] = sum(Revenue[t,1:3])
-#   
-# }
-```

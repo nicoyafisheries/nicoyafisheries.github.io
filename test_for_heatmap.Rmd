@@ -293,7 +293,7 @@ filled.contour(y = Lc,
 
 ```{r eval=FALSE}
 library(ggplot2)
-
+# This plot is not the one you want - set not to evaluate
 # Lc.Catch = 
   ggplot(TEMP, aes(x=Lc, y= Total.Catch)) +
               geom_jitter() +
@@ -305,7 +305,7 @@ library(ggplot2)
 
 ```{r eval=FALSE}
 
-# 
+# This plot is not the one you want - set not to evaluate
 # Lc.Rev =
   
   ggplot(TEMP, aes(x=Lc, y= Total.Revenue)) +
@@ -318,16 +318,20 @@ library(ggplot2)
 
 
 ```{r schaffer_plot}
-
+#transpose Revenue matrix
 Actual.Rev = t(Results$Rev[5,])
 
+#new datafram for plot
 schaffer.data <- data.frame(mortality = F, 
                             revenue = Actual.Rev)
 
 colnames(schaffer.data) <- c("mortality", "revenue")
 
+#Calcualtes marginal cost of fishing mortality
+#NOTE! if you change the number of iterations (ie the range of F or Lc) then you need to reset the values called here to make sure the are selecting the real world values of F and Lc
 c = schaffer.data[13,2]/schaffer.data[13,1]
 
+#makes schaffer plot
 ggplot(schaffer.data, aes(x = mortality, y = revenue )) +
               geom_point(color="darkblue") +
               geom_line(color="darkblue", size=1, show.legend = TRUE) +
@@ -353,10 +357,11 @@ ggplot(schaffer.data, aes(x = mortality, y = revenue )) +
 
 Costs = c*F
 
+#creates datafrmae 'Profit' as part of the list "Results"
 Results$Profit <- apply(Results$Rev , 1, '-', Costs)
 
 
- lvls <- seq(min(Results$Profit), max(Results$Profit), length.out = 70)
+ #lvls <- seq(min(Results$Profit), max(Results$Profit), length.out = 70)
 
 filled.contour(x = F,
                y = Lc,
@@ -370,52 +375,3 @@ filled.contour(x = F,
 
 ```
 
-
-
-
-```{r}
-# Revenue$Lc = seq(1:length(Revenue$small)) 
-# 
-# Revbar = gather(Revenue[, c(1:3,5)],'Size.Class' ,'Revenue', 1:3)
-# 
-# 
-# library(ggplot2)
-# 
-# 
-# ggplot(Revbar, aes(x= Lc, y= Revenue, fill =factor(Size.Class ))) +
-#   geom_bar(stat="identity",position = "stack")
-# 
-
-#
-```
-
-```{r ugly_plot_N}
-
-# df.hist = stack(N_at[NumYears, ])
-# 
-# barplot(df.hist$values, names.arg = df.hist$ind)
-# 
-# CatchCurve <- lm(log(values) ~ ind, data = df.hist)
-# 
-# Z.est = -CatchCurve$coefficients[2]
-# 
-# print(Z.est)
-```
-
-
-```{r Revenue}
-
-#Calculate Revenue by commercial class------
-
-# for (t in 1:NumYears){
-# 
-#   Revenue[t,1] = sum(Weight[1:2]*Catch[t,1:2]*Price[1])
-#   
-#   Revenue[t,2] = sum(Weight[3:5]*Catch[t,3:5]*Price[2])
-#   
-#   Revenue[t,3] = sum(Weight[5:max(Age)]*Catch[t,5:max(Age)]*Price[3])
-#   
-#   Revenue[t,4] = sum(Revenue[t,1:3])
-#   
-# }
-```
