@@ -41,7 +41,7 @@ Wa = 0.024
   
 Wb = 2.824
   
-
+maxAge = 18
 
 #Length (cm) at which a fish is  mature
 
@@ -62,14 +62,19 @@ h=0.7
 
 
 ```{r Data}
+#Morphology ----
 
 #Our max age is 18 years
-Age <- seq(1,18,1)
+Age <- seq(1,maxAge,1)
 
-Length <- Linf*(1-exp(-K*(Age-to)))
+#Length at median age 
+Length <- Linf*(1-exp(-K*((Age + 0.5)-to)))
 
 #Converts lengths (cm) to weight (g)
 Weight <- Wa*Length^Wb
+
+
+#Scenario control-----
 
 #Length at first capture
 Lc = seq(15, 100, 2 )
@@ -148,13 +153,12 @@ $$ Revenue =\sum_{a=1}^3N_{a} w_{a}P_1 + \sum_{a=4}^6N_{a} w_{a}P_2 + \sum_{a=6}
 ```{r Generate Population Data}
 
 
-
 #this sets top left
 N_at[1,1] = R0
 
 
 #  Set inital condition in year t = 0 (assumes no fishing)
-for (a in 1:17){
+for (a in 1:(maxAge-1)){
  
   N_at[1,a+1] = N_at[1,(a)]*exp(-M)
   
@@ -185,7 +189,7 @@ for (f in 1:length(F)){
         
       N_at[t,1] = (0.8*R0*h*Eggs[t-1])/(0.2*phi*(1-h)+(h-0.2)*Eggs[t-1])
       
-          for (a in 1:17) {
+          for (a in 1:(maxAge-1)) {
           
           
           # Introduce fishing as Va*F  
@@ -201,7 +205,7 @@ for (f in 1:length(F)){
             
           }
       
-       Catch$Total[t] = sum(Catch[t,1:18])  
+       Catch$Total[t] = sum(Catch[t,1:maxAge])  
       
        Eggs[t] = sum(N_at[t,]*fa*Ma)
        
@@ -360,6 +364,8 @@ Costs = c*F
 #creates datafrmae 'Profit' as part of the list "Results"
 Results$Profit <- apply(Results$Rev , 1, '-', Costs)
 
+#retruns row and col number where Profits are maximized
+which(Results$Profit == max(Results$Profit), arr.ind = TRUE)
 
  #lvls <- seq(min(Results$Profit), max(Results$Profit), length.out = 70)
 
@@ -371,6 +377,7 @@ filled.contour(x = F,
                plot.title = title(main = "Profit",
                             ylab = "Gear Selectivity (length at first capture)", 
                             xlab = "Effort (Fishing Mortality)"))
+
 
 
 ```
