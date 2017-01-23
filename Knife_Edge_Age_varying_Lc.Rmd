@@ -52,6 +52,8 @@ M <- 0.258
 
 F <- 0.315
 
+#Selectivty in 2014 was 29 cm
+
 # BHa <- 054.6 #this is made up
 # 
 # BHb <- 0.0089 #this is made up
