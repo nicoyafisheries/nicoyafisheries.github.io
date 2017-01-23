@@ -1,0 +1,166 @@
+Deterministic Age-Stuctured Model with Knife-edge selectivity
+
+##Parameters
+ *Linf* - Von Bertalanffy asymptotic length  
+ *K* - Von Bertalanffy growth parameter  
+ *to* - Von Bertalanffy theoretical length of fish age 0  
+ *BHa* - Beverton Holt alpha  
+ *BHb* - Beverton Holt beta  
+ *Va* - vulnerability to fishing at Age = a  
+ *Ma* - Maturity at Age = a  
+ *fa* - fecundity at Age = a  (weight of individual * number of eggs produced per gram )
+ *M*- natural mortality  
+ *F* - fishing mortality  
+
+##Output
+ N_at <- dataframe of number of individuals for every age a (cols) at time t (rows)
+ 
+ Catch <- dataframe of number of individuals caought for every age a (cols) at time t (rows)
+ 
+ Revenue <- Splits revenue by 3 commercial size classes 
+
+```{r setup}
+rm(list=ls())
+
+library(colorRamps)
+library(tidyverse)
+
+#Set Model----
+NumYears = 40
+
+R0 = 1000
+
+```
+
+
+```{r Parameters}
+Linf = 122.1
+K = 0.172
+to = 0.919
+  
+Wa = 0.024
+  
+Wb = 2.824
+  
+maxAge = 18
+
+#Length (cm) at which a fish is 50/95 percent likely to be mature
+m50 = 55
+
+m95 = 62.7
+
+#Natural mortality
+M <- K * 1.5
+
+
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
+```
+
+
+
+```{r Data}
+#Morphology ----
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf*(1-exp(-K*((Age + 0.5)-to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+
+#Scenario control-----
+
+#Length at first capture
+Lc = seq(20, 60, 10 )
+
+F = seq(0, 0.5 , 0.25) 
+
+
+#Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+
+#Price per USD per kg is dependent on size of fish
+Price <- c(0.71,3.25,4.31)
+```
+
+
+```{r Data Structures}
+
+Scenarios = expand.grid(Lc, F) %>%
+            mutate(Label = as.vector(outer(Lc, F, paste, sep = "-"))) %>%
+            select(Label , F = Var2, Lc = Var1) %>%
+            split(.$Label)
+
+maybe = tribble(~Label, ~Scenarios)
+
+ Out = data.frame(matrix(data = NA, ncol = 2, nrow = 2))
+
+testfun = function(F, Lc){
+  
+F + Lc
+ 
+#  Out[1,1] = F + Lc
+#  
+#  Out[1,2] = F + Lc + 1
+#  
+# Out[2,1] = F - Lc
+#  
+#  Out[2,2] = F - Lc + 1
+#  
+#  return(Out)
+  
+}
+
+test = Scenarios %>%
+    group_by(F) %>%
+  nest()
+
+result = test %>%
+  
+
+
+N_at <- data_frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
+  colnames(N_at) = as.character(c(Age))
+
+Eggs <- vector(length = NumYears)
+
+Catch <- data_frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
+  colnames(Catch) = as.character(c(Age,'Total'))
+
+
+Revenue <- data_frame(matrix(data = NA, ncol = 4, nrow = NumYears)) 
+  colnames(Revenue) = c('small',
+                        'med',
+                        'large',
+                        'total')
+
+
+
+#Scenarios based on length at first capture (Lc)
+
+
+Results  <- data_frame(F, Lc)
+  
+# 
+# TEMP <- data.frame(matrix(data = NA, ncol = max(Age) + 4 , nrow = length(Lc)))
+# colnames(TEMP) <- as.character(c('F','Lc', Age,'Total.Catch','Total.Revenue'))
+# 
+# 
+# Results.Rev <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc))) %>%
+#            as_data_frame()
+# 
+# Results.Biomass <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc))) %>%
+#            as_data_frame()
+# 
+# Results <- list(Rev = Results.Rev, Biomass = Results.Biomass) 
+
+```
+
