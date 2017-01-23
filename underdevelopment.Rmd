@@ -96,43 +96,48 @@ Price <- c(0.71,3.25,4.31)
 
 Scenarios = expand.grid(Lc, F) %>%
             mutate(Label = as.vector(outer(Lc, F, paste, sep = "-"))) %>%
-            select(Label , F = Var2, Lc = Var1) %>%
-            split(.$Label)
+            select(Label , F = Var2, Lc = Var1) 
 
-maybe = tribble(~Label, ~Scenarios)
+# %>%
+#             split(.$Label)
 
- Out = data.frame(matrix(data = NA, ncol = 2, nrow = 2))
+# maybe = tribble(~Label, ~Scenarios)
 
-testfun = function(F, Lc){
-  
-F + Lc
- 
-#  Out[1,1] = F + Lc
+#  Out = data.frame(matrix(data = NA, ncol = 2, nrow = 2))
+# 
 #  
-#  Out[1,2] = F + Lc + 1
 #  
-# Out[2,1] = F - Lc
 #  
-#  Out[2,2] = F - Lc + 1
+# testfun = function(F, Lc){
+#   
+# F + Lc
 #  
-#  return(Out)
-  
-}
+# #  Out[1,1] = F + Lc
+# #  
+# #  Out[1,2] = F + Lc + 1
+# #  
+# # Out[2,1] = F - Lc
+# #  
+# #  Out[2,2] = F - Lc + 1
+# #  
+# #  return(Out)
+#   
+# }
+# 
+# test = Scenarios %>%
+#     group_by(F) %>%
+#   nest()
+# 
+# result = test %>%
+#   
 
-test = Scenarios %>%
-    group_by(F) %>%
-  nest()
 
-result = test %>%
-  
-
-
-N_at <- data_frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
+N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
   colnames(N_at) = as.character(c(Age))
 
 Eggs <- vector(length = NumYears)
 
-Catch <- data_frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
+Catch <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
   colnames(Catch) = as.character(c(Age,'Total'))
 
 
@@ -161,6 +166,101 @@ Results  <- data_frame(F, Lc)
 #            as_data_frame()
 # 
 # Results <- list(Rev = Results.Rev, Biomass = Results.Biomass) 
+
+a = c(1,2,3)
+b = c(4,5,6)
+
+c = expand.grid(a,b)
+
+testfun = function(input){
+  return(data.frame(matrix(data = input, ncol = 3, nrow = 3)))
+}
+
+
+testfun(1)
+testfun(2)
+
+plyr::ldply(a, testfun)
+testBest =plyr::ddply(c, c('Var1', 'Var2'), function(x){
+  
+  return(data.frame(matrix(data = x$Var1, ncol = 3, nrow = x$Var2)))
+})
+
+
+```
+
+```{r hopeful}
+
+
+PlzWork = plyr::ddply(Scenarios,'Label', function(x){ 
+  
+  R0. = R0 
+  maxAge. = maxAge 
+  h. = h
+  fa. = fa
+  Ma. = Ma
+  Length. = Length
+  Weight. = Weight
+  M. = M
+  
+  F = x$F
+  
+  Lc = x$Lc
+  
+  #this sets top left
+  N_at[1,1] = R0.
+  
+  
+  #  Set inital condition in year t = 0 (assumes no fishing)
+  for (a in 2:(maxAge.)) {
+    
+    N_at[1,a] = N_at[1,(a-1)]*exp(-M.)
+    
+  }
+  
+  
+  
+  #Length (cm) at which a fish is vulnerable to fishing mortality
+  
+  print(F)
+  
+  print(Lc)
+  
+  Va = ifelse(Length. < Lc, 0, 1)
+  
+  #Eggs produced in year 1
+  Eggs[1] = sum(N_at[1,]*fa.*Ma.)
+  
+  phi <- Eggs[1]
+  
+  #Catch[1,] = 0
+  
+  
+  for (t in 2:NumYears) {
+    
+    N_at[t,1] = (0.8 * R0. * h. * Eggs[t-1]) / (0.2 * phi * (1-h.) + (h.-0.2) * Eggs[t-1])
+    
+    for (a in 2:(maxAge.)) {
+      
+      
+      # Introduce fishing as Va*F  
+      N_at[t,a] = exp(-M. - Va[a-1]*F)*N_at[(t - 1),(a-1)]
+      
+      plusGroup = N_at[t,maxAge] + exp(-M - Va[maxAge]*F)*N_at[(t - 1),(maxAge)]
+      
+      N_at[t,maxAge] = plusGroup
+      
+    }
+    
+    Eggs[t] = sum(N_at[t,]*fa*Ma)
+    
+  }
+  
+    Out = N_at
+  return(Out)
+  }
+)
+
 
 ```
 
