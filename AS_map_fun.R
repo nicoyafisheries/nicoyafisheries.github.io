@@ -1,5 +1,4 @@
 
-# Mon Jan  9 19:43:40 2017 ------------------------------
 
 
 AgeStructure = function(R0,maxAge,Lc,h,fa,Ma,Length, Weight,M,F,) {
