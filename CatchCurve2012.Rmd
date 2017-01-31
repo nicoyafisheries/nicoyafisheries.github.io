@@ -44,10 +44,38 @@ LH$K <- 0.172
 
 ```
 
+```{r}
+
+ggplot(corvina.all.2012, aes(x=length_class)) +
+  geom_histogram(binwidth = 1, colour = "darkgreen", fill = "darkgreen") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(size=17),
+        axis.text.y = element_text(size=17),
+        axis.title.x = element_text(size=18),
+        axis.title.y = element_text(size=18)) +
+labs(x = "Length (cm)")
+
+```
 
 ```{r}
 
-CatchCurve(corvina.all.2012, LH)
+corvina.all.2012$age_class <- to - (1/K) * log(1- corvina.all.2012$length_class /Linf) 
+
+ggplot(corvina.all.2012, aes(x=age_class)) +
+  geom_histogram(binwidth = 1, colour = "darkblue", fill = "darkblue") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
+  theme(axis.text.x = element_text(size=17),
+        axis.text.y = element_text(size=17),
+        axis.title.x = element_text(size=18),
+        axis.title.y = element_text(size=18)) +
+labs(x = "Age (years)")
+```
+
+```{r}
+
+CatchCurve(corvina.all.2012$length_class, LH)
 
 
 M <- 0.3
@@ -56,6 +84,8 @@ F <- Z-M
 
 
 FFmsy <- F/M
+
+p1
 
 ```
 

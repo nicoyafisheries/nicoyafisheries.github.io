@@ -77,7 +77,7 @@ Weight <- Wa*Length^Wb
 #Length at first capture
 Lc = seq(20, 60, 10 )
 
-F = seq(0, 0.5 , 0.25) 
+F = presseq(0, 0.5 , 0.25) 
 
 
 #Maturity
@@ -151,43 +151,7 @@ Revenue <- data.frame(matrix(data = NA, ncol = 4, nrow = NumYears))
 
 
 
-#Scenarios based on length at first capture (Lc)
 
-
-#Results  <- data.frame(F, Lc)
-  
-# 
-# TEMP <- data.frame(matrix(data = NA, ncol = max(Age) + 4 , nrow = length(Lc)))
-# colnames(TEMP) <- as.character(c('F','Lc', Age,'Total.Catch','Total.Revenue'))
-# 
-# 
-# Results.Rev <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc))) %>%
-#            as_data_frame()
-# 
-# Results.Biomass <- data.frame(matrix(data = NA, ncol = length(F), nrow = length(Lc))) %>%
-#            as_data_frame()
-# 
-# Results <- list(Rev = Results.Rev, Biomass = Results.Biomass) 
-# 
-# a = c(1,2,3)
-# b = c(4,5,6)
-# 
-# c = expand.grid(a,b)
-  # 
-  # testfun = function(input){
-  #   return(data.frame(matrix(data = input, ncol = 3, nrow = 3)))
-  # }
-  # 
-  # 
-  # testfun(1)
-  # testfun(2)
-  # 
-  # plyr::ldply(a, testfun)
-  # testBest =plyr::ddply(c, c('Var1', 'Var2'), function(x){
-  #   
-  #   return(data.frame(matrix(data = x$Var1, ncol = 3, nrow = x$Var2)))
-  # })
-  
   
 ```
   
@@ -242,6 +206,8 @@ PlzWork = plyr::ddply(Scenarios,'Label', function(x){
   
   for (t in 2:NumYears) {
     
+    
+    #Beverton-Holt spawner recruit relationship
     N_at[t,1] = (0.8 * R0. * h. * Eggs[t-1]) / (0.2 * phi * (1-h.) + (h.-0.2) * Eggs[t-1])
     
     for (a in 2:(maxAge.)) {
@@ -291,7 +257,7 @@ PlzWork = plyr::ddply(Scenarios,'Label', function(x){
 ```{r}
  prettyPLZ <- PlzWork %>%
   as_tibble() %>%
-  split(.$Label) %>%
-  nest("1":"18")
+  group_by(Label) %>%
+  nest()
 ```
 
