@@ -1,0 +1,29 @@
+---
+title: "Untitled"
+author: "Alex Smith"
+date: "2/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Going beyond Myers and Doyle (Myers and Doyle 1983) and building on Gunderson (1980), Gunderson and Dygert (1988) use reproductive effort as such a trait:
+
+$$M = 0.03+ 1.68GSI$$
+
+where GSI is the gonadal-somatic-index.
+
+
+## Age-dependent natural mortality
+
+$$M(t) = \frac{K}{1-e^{-K(t-t_0)}}$$
+
+```{r}
+
+-log(0.05/18)
+
+
+```
+
