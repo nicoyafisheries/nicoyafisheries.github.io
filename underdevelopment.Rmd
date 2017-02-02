@@ -26,7 +26,7 @@ library(colorRamps)
 library(tidyverse)
 
 #Set Model----
-NumYears = 40
+NumYears = 60
 
 R0 = 1000
 
@@ -72,13 +72,6 @@ Length <- Linf*(1-exp(-K*((Age + 0.5)-to)))
 Weight <- Wa*Length^Wb
 
 
-#Scenario control-----
-
-#Length at first capture
-Lc = seq(20, 60, 10 )
-
-F = presseq(0, 0.5 , 0.25) 
-
 
 #Maturity
 Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
@@ -89,81 +82,82 @@ fa <- Weight*41
 
 #Price per USD per kg is dependent on size of fish
 Price <- c(0.71,3.25,4.31)
+
+
+corvinaperhour = 0.954615805
+
+avgHr.perday = 10
+
+fishingdayspermonth = 20
 ```
 
 
 ```{r Data Structures}
 
-Scenarios = expand.grid(Lc, F) %>%
-            mutate(Label = as.vector(outer(Lc, F, paste, sep = "-"))) %>%
-            select(Label , F = Var2, Lc = Var1) 
 
-# %>%
-#             split(.$Label)
 
-# maybe = tribble(~Label, ~Scenarios)
-
-#  Out = data.frame(matrix(data = NA, ncol = 2, nrow = 2))
-# 
-#  
-#  
-#  
-# testfun = function(F, Lc){
-#   
-# F + Lc
-#  
-# #  Out[1,1] = F + Lc
-# #  
-# #  Out[1,2] = F + Lc + 1
-# #  
-# # Out[2,1] = F - Lc
-# #  
-# #  Out[2,2] = F - Lc + 1
-# #  
-# #  return(Out)
-#   
-# }
-# 
-# test = Scenarios %>%
-#     group_by(F) %>%
-#   nest()
-# 
-# result = test %>%
-#   
-
+# Stores abundance in each age cohort
 
 N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
   colnames(N_at) = as.character(c(Age))
 
+# Stores number of total eggs produced in each year   
 Eggs <- vector(length = NumYears)
 
+# Sum of abundance_a * weight_a
 Biomass <- vector(length = NumYears)
 
+# Stores output of Baranov catch equation summed across cohorts
 Catch <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
   colnames(Catch) = as.character(c(Age,'Total'))
 
-
+# Groups biomass by commercial class multiples by price_cc and sums in each year
 Revenue <- data.frame(matrix(data = NA, ncol = 4, nrow = NumYears)) 
   colnames(Revenue) = c('small',
                         'med',
-                        'large',
-                        'total')
+                        'large')
+                        # ,
+                        # 'total')
 
+RevenueTotal = vector(length = NumYears)  
 
+CatchTotal = vector(length = NumYears)  
+  
+# Stores year
+  
+year = vector(length = NumYears)
 
+HourFishing = vector(length = NumYears) 
 
+vessels =vector(length = NumYears)
   
 ```
   
+```{r set_scenario}
+
+#Scenario control-----
+
+#Length at first capture
+Lc = c(29)
+
+F = seq(0,1, 0.025)
+
+Scenarios = expand.grid(Lc, F) %>%
+            mutate(Label = as.vector(outer(Lc, F, paste, sep = "-"))) %>%
+            select(Label , F = Var2, Lc = Var1) 
+
+
+InitialCondition <- c(318.13738, 247.28432, 135.491025, 74.262124, 40.716966, 22.3328194, 12.2540971, 6.7266512, 3.69408854, 2.02963655, 1.11569252, 0.61362030, 0.337674794, 0.185933343, 0.102445509, 5.648386e-02, 3.116534e-02, 3.852763e-02)
+```
+
   
-  
-```{r hopeful}
+```{r run_model}
   
 
-PlzWork = plyr::ddply(Scenarios,'Label', function(x){ 
+Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   
-  R0. = R0 
-  maxAge. = maxAge 
+  R0. = R0
+  maxAge. = maxAge
   h. = h
   fa. = fa
   Ma. = Ma
@@ -174,90 +168,160 @@ PlzWork = plyr::ddply(Scenarios,'Label', function(x){
   F = x$F
   
   Lc = x$Lc
-  
-  #this sets top left
-  N_at[1,1] = R0.
-  
-  
-  #  Set inital condition in year t = 0 (assumes no fishing)
-  for (a in 2:(maxAge.)) {
-    
-    N_at[1,a] = N_at[1,(a-1)]*exp(-M.)
-    
-  }
-  
-  
-  
-  #Length (cm) at which a fish is vulnerable to fishing mortality
-  
+ 
+  # track model progress
   print(paste("F", F, sep = " = "))
   
   print(paste("Lc", Lc, sep = " = "))
+
+#Pristine Inital condition----    
+   
+  # #this sets top left
+  # N_at[1, 1] = R0.
+  # 
+  # 
+  # #  Set inital condition in year t = 0 (assumes no fishing) 
+  # for (a in 2:(maxAge.)) {
+  # N_at[1, a] = N_at[1, (a - 1)] * exp(-M.)
+  # 
+  # }
+  # 
   
+  
+  
+  
+  
+#Overfished Inital condition-----
+  N_at[1,] = InitialCondition
+  
+  Biomass[1] = sum(N_at[1, 1:maxAge.] * Weight.)
+  
+  #Length (cm) at which a fish is vulnerable to fishing mortality----
   Va = ifelse(Length. < Lc, 0, 1)
   
   #Eggs produced in year 1
-  Eggs[1] = sum(N_at[1,]*fa.*Ma.)
+  Eggs[1] = sum(N_at[1, ] * fa. * Ma.)
   
   phi <- Eggs[1]
   
-  #Catch[1,] = 0
+  # no catch in year 1
+  Catch[1,] = 0
+  
+  # no revenue in year 1
+  Revenue[1,] = 0
   
   
   for (t in 2:NumYears) {
+  
+  year[t] = t  
     
+  #Beverton-Holt spawner recruit relationship-----
+  
+  N_at[t, 1] = (0.8 * R0. * h. * Eggs[t - 1]) / (0.2 * phi * (1 - h.) + (h. -
+  0.2) * Eggs[t - 1])
+  
+  
+  #Abundance in each cohort----
+  
+  for (a in 2:(maxAge.)) {
+  # Introduce fishing as Va*F
     
-    #Beverton-Holt spawner recruit relationship
-    N_at[t,1] = (0.8 * R0. * h. * Eggs[t-1]) / (0.2 * phi * (1-h.) + (h.-0.2) * Eggs[t-1])
-    
-    for (a in 2:(maxAge.)) {
-      
-      
-      # Introduce fishing as Va*F  
-      N_at[t,a] = exp(-M. - Va[a-1]*F)*N_at[(t - 1),(a-1)]
-      
-      plusGroup = N_at[t,maxAge] + exp(-M - Va[maxAge]*F)*N_at[(t - 1),(maxAge)]
-      
-      N_at[t,maxAge] = plusGroup
-      
-      #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t
-      
-      Catch[t,a] = ((Va[a] * F) / (Va[a] * F + M)) * N_at[(t),(a)] * (1 - exp(-M - Va[a] * F))
-      
-      Catch[t,1] = 0
-      
-    }
-    
-    Catch$Total[t] = sum(Catch[t,1:maxAge])  
-    
-    Eggs[t] = sum(N_at[t,]*fa*Ma)
-    
-    #Calculate Revenue by commercial class
-    
-    Revenue[t,1] = sum(Weight.[1:2]*Catch[t,1:2]*Price[1]/1000)
-    
-    Revenue[t,2] = sum(Weight.[3:4]*Catch[t,3:4]*Price[2]/1000)
-    
-    Revenue[t,3] = sum(Weight.[5:maxAge.]*Catch[t,5:maxAge.]*Price[3]/1000)
-    
-    Revenue[t,4] = sum(Revenue[t,1:3])
-   
-    Biomass[t] <- sum(N_at[t,1:maxAge.]*Weight.)
-     
+  N_at[t, a] = exp(-M. - Va[a - 1] * F) * N_at[(t - 1), (a - 1)]
+  
+  # Additional calculation for group maxAge
+  plusGroup = N_at[t, maxAge] + exp(-M - Va[maxAge] * F) * N_at[(t - 1), (maxAge)]
+  
+  N_at[t, maxAge] = plusGroup
+  
+  #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t----
+  
+  Catch[t, a] = (((Va[a] * F) / (Va[a] * F + M)) * N_at[(t), (a)] * (1 - exp(-M - Va[a] * F)))*(Weight[a]/1000)
+  
+  Catch[t, 1] = 0
+  
   }
   
-  Out = cbind(N_at, Catch$Total, Revenue$total, Biomass)
+  #store results----
+  
+  CatchTotal[t] = sum(Catch[t, 1:maxAge])
+  
+  #Effort calculation 1----
+  # 
+  #  HourFishing[t] = CatchTotal[t]/corvinaperhour
+  # # # 
+  #  vessels[t] = HourFishing[t] / (avgHr.perday*fishingdayspermonth*12)
+  # # # 
+  # 
+
+  
+# Calculate Egg production for time t----  
+  Eggs[t] = sum(N_at[t, ] * fa * Ma)
+  
+  #Calculate Revenue by commercial class
+  
+  Revenue[t, 1] = sum(Catch[t, 1:2] * Price[1] / 1000)
+  
+  Revenue[t, 2] = sum( Catch[t, 3:4] * Price[2] / 1000)
+  
+  Revenue[t, 3] = sum(Catch[t, 5:maxAge.] * Price[3] /
+  1000)
+  
+  RevenueTotal[t] = sum(Revenue[t, 1:3])
+  
+  Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
+  
+  }
+  
+  Out = cbind(year, N_at, CatchTotal, RevenueTotal, Biomass)
   return(Out)
-}
-)
+})
 
 
 ```
 
+
 ```{r}
- prettyPLZ <- PlzWork %>%
-  as_tibble() %>%
-  group_by(Label) %>%
-  nest()
+p1 = Model.full %>%
+  filter(year == NumYears) %>%
+  mutate(mortality = F) %>%
+  ggplot(aes(x = vessels, y = (CatchTotal/Biomass))) +
+  geom_point() +
+  theme_minimal()
+
+plotly::ggplotly(p1)
+```
+
+```{r}
+p1 = Model.full %>%
+  ggplot(aes(x = year, y = RevenueTotal, group = Label, color = Label)) +
+  geom_line() +
+  theme_minimal()
+
+plotly::ggplotly(p1)
+```
+
+
+
+```{r}
+
+#devtools::install_github("hafen/trelliscopejs")
+
+Model.full %>%
+  #group_by(Label) %>%
+  ggplot(aes(x = year, y = RevenueTotal)) +
+  geom_point() +
+  theme_minimal() +
+  trelliscopejs::facet_trelliscope(~Label)
+
+
+```
+
+
+   
+```{r nesting}
+ # prettyPLZ <- PlzWork %>%
+ #  as_tibble() %>%
+ #  group_by(Label) %>%
+ #  nest()
 ```
 
