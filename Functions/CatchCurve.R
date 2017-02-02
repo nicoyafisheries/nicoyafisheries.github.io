@@ -1,59 +1,76 @@
 #Linearized Catch Curve using methods from Fish Forever excel
 #
-# 
 
-#LengthData <- dataset of lengths for a single species
-#
-#LH <- VB Life history parameters Linf, K, to 
+# INPUTS -----
+
+# LengthData <- vector of lengths for a single species (Ex: LengthData$Lengths)
+# LH <- VB Life history parameters Linf, K, to (can be stored as dataframe or list/)
+
+# OUTPUTS ------
+
+# Z estimate of instantaneous mortality
+# Zerror <- 95 5 confidence interval
+# p1 <- plot of binned age log frequency with linear fit
 
 CatchCurve <- function(LengthData, LH){
- LengthData= corvina.all.2012
+
   
-#calculates Lc value as the mode of data
-  uniqv <- unique(LengthData$length_class)
-  Lc <- uniqv[which.max(tabulate(match(LengthData$length_class, uniqv)))]
+    
+  # Nested function to calculate mode    
+  Mode <- function( values, round = 1){
+    
+    uniq = unique(round(values, digits = round))
+    
+    uniq[which.max(tabulate(match(values, uniq)))]
+    
+    
+  }
+  
+  # Load LH
   
   Linf <- LH$Linf
   
   K <- LH$K
   
   to <- LH$to
- 
-#subsets data to only include lengths >= Lc 
-  Lengths <- LengthData$length_class[LengthData$length_class >= Lc]
   
-  Ages <- to - (1/K) * log(1-Lengths/Linf)
+  # Assign Length data  
+  Lengths <- LengthData
   
+  #Convert length to age
+  Ages <- to - (1/K) * log(1-Lengths/Linf) 
+  
+  # Use mode to set age at which a fish is fully vulnerable
+  
+  minAge <- Mode(Ages, 0)
+  
+  # Bin ages into 1 year bins    
   ageBins = trunc(Ages)
   
-  df <- plyr::count(ageBins)
-  
-  
-  x <- df$x
-  
-  y <- log(df$freq)
-  
+  # Create frequency table    
+  Age.freq <- plyr::count(ageBins) %>%
+    filter(x >= minAge) %>%
+    select(Age = x, Count = freq) %>%
+    as_data_frame()
 
-  catch.curve.model <- lm(log(freq)~x, df)
+  
+  
+  catch.curve.model <- lm(log(Count) ~ Age, data = Age.freq)
   
   Z <<- (catch.curve.model$coefficients[2])*(-1)
   
   
-  CI95 <- confint(catch.curve.model,x,  level = 0.95)
+  CI95 <- confint(catch.curve.model, Age.freq$Age,  level = 0.95)
   
-  Zerror <<- Z+CI95[1]
+  Zerror <<-( - 1) * (Z + CI95[1])
   
-p1<<- ggplot(df, aes(x= x, y=log(freq))) +
+  p1 <<- ggplot(Age.freq, aes( x = Age, y = log(Count))) +
     geom_point()+
     stat_smooth(method = lm) +
-    labs(x= 'Age', y = "ln(Age Frequency)")+
+    labs(x = 'Age', y = "ln(Age Frequency)")+
     theme_minimal() +
-    annotate("text", x= 10, y= 6, label = paste(" Z = ", paste((round(Z, digits = 4)) , round(Zerror, digits = 3), sep = " ± ")))
- 
-print(Z)
+    annotate("text", x = 10, y = 6, label = paste(" Z = ", paste((round(Z, digits = 4)) , round(Zerror, digits = 3), sep = " ± ")))
+  
+  print(paste(" Z = ", paste((round(Z, digits = 6)))))
 
-colnames(df) = c("AgeBins", "Count")
-
-Age.freq <<- df
-   
 }

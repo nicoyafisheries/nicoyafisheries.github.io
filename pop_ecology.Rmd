@@ -1,0 +1,57 @@
+---
+title: "Untitled"
+author: "Alex Smith"
+date: "2/2/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(mgcv)
+```
+
+
+```{r}
+
+incopesca <- read_csv("./data/catch_1952_2013.csv")
+
+
+```
+
+```{r}
+I2 = incopesca %>%
+  filter(Year > 1972) %>%
+  mutate(N_tm1 = lag(Corvina.y.Robalo))
+  
+
+ggplot(I2, aes(y = (Corvina.y.Robalo), x = Year)) +
+  geom_point()+
+  stat_smooth(method = "lm")
+    
+    #data = I2,  method = "gam", formula = y ~ s(x))
+
+```
+
+
+```{r}
+# catch_gam = gam( Corvina.y.Robalo ~ s(Year), data = I2)
+# 
+# summary(catch_gam)
+# 
+
+mod2 <- nls( Corvina.y.Robalo  ~ exp(a + b * (Year-1971)), data = I2, start = list(a = 0, b = 0))
+
+summary(mod2)
+
+
+
+
+mod3 = lm(log(Corvina.y.Robalo) ~ Year, data = I2)
+
+summary(mod3)
+
+confint(mod3)
+```
+
