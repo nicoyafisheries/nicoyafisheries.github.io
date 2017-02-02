@@ -4,7 +4,7 @@ author: "Alex Smith"
 date: "October 24, 2016"
 output: html_document
 ---
-##Setup
+##Setup.
 
 ```{r setup, message=FALSE, warning=FALSE}
 rm(list=ls())
@@ -58,4 +58,5 @@ F <- Z-M
 FFmsy <- F/M
 
 ```
+
 
