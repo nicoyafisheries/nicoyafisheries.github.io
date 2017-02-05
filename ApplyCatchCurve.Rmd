@@ -1,0 +1,60 @@
+---
+author: "Alex Smith"
+date: "2/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list=ls())
+
+library(tidyverse)
+
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+#Data----
+
+load('lengths.RData')
+
+
+LH <- list(Linf = 122.1,
+           K = 0.172,
+           to = 0.919)
+
+
+
+```
+
+
+```{r}
+
+#Filter data by year and zone
+
+GN2012 = lengths %>%
+  filter(Year == 2012)
+
+GN2014_1 = lengths %>%
+  filter(Year == 2014) %>%
+  filter(Zone == 201) 
+
+GN2014_2 = lengths %>%
+  filter(Year == 2014) %>%
+  filter(Zone == 202) 
+
+#Apply catch curve and mode functions for Z and Lc
+CC2012 = CatchCurve(GN2012$Length, LH)
+
+Mode(GN2012$Length)
+
+CC2014_1 = CatchCurve(GN2014_1$Length, LH)
+
+Mode(GN2014_1$Length)
+
+CC2014_2 = CatchCurve(GN2014_2$Length, LH)
+
+```
+
