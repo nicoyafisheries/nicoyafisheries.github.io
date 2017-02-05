@@ -304,3 +304,17 @@ ggplot(NPV_effort, aes(F.Mortality, NPV )) +
   theme_minimal()
 ```
 
+```{r}
+F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
+
+Model.full %>%
+  filter(F.Mortality == F_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
+  ggplot(aes(x= year, y = PV)) + 
+  geom_point() + 
+  theme_minimal() + 
+  labs(y = "Discount Profit from Corvina Reina fishery")
+```
+
+
+
