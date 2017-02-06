@@ -1,0 +1,58 @@
+<!-- # --- -->
+date: "February 5, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+rm(list=ls())
+
+library(tidyverse)
+
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+```
+
+
+```{r load_and_clean data}
+
+all.gear.2012 <- read_csv('../data/corvina2012_length-age_all.csv') %>%
+  mutate(Year = 2012) %>%
+  mutate(Zone = 201)
+
+all.gear.2014.1 <- read_csv('../data/corvina2014_length_201_allgear.csv') %>%
+  mutate(Year = 2014) %>%
+  mutate(Zone = 201) %>%
+  mutate(date = NA) %>%
+  mutate(label = NA)
+
+temp <- read.csv('../data/corvina2014_length_202_allgear.csv') 
+
+  
+all.gear.2014.2 <- data.frame( length_class = rep(temp[,1], times= temp[,2])) %>%
+  mutate(Year = 2014) %>%
+  mutate(Zone = 202) %>%
+  mutate(date = NA) %>%
+  mutate(label = NA)
+  
+lengths = data.frame(Year = c(all.gear.2012$Year,
+                                 all.gear.2014.1$Year, 
+                                 all.gear.2014.2$Year),
+                        Zone = c(all.gear.2012$Zone,
+                                 all.gear.2014.1$Zone, 
+                                 all.gear.2014.2$Zone),
+                        Length = c(all.gear.2012$length_class,
+                                   all.gear.2014.1$length_class, 
+                                   all.gear.2014.2$length_class),
+                        Date = c(all.gear.2012$date,
+                                 all.gear.2014.1$date, 
+                                 all.gear.2014.2$date), 
+                        Geartype = "all"
+)
+
+save(lengths, file = "lengths.RData")
+
+
+```
+

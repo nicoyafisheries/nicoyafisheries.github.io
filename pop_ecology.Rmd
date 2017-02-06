@@ -26,9 +26,10 @@ I2 = incopesca %>%
   mutate(N_tm1 = lag(Corvina.y.Robalo))
   
 
-ggplot(I2, aes(y = (Corvina.y.Robalo), x = Year)) +
+ggplot(I2, aes(y = log(Corvina.y.Robalo), x = Year)) +
   geom_point()+
-  stat_smooth(method = "lm")
+  stat_smooth(method = "lm") +
+  theme_minimal()
     
     #data = I2,  method = "gam", formula = y ~ s(x))
 

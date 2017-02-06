@@ -1,0 +1,25 @@
+---
+author: "Alex Smith"
+date: "2/5/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+
+load('BurnIn.RData')
+```
+
+
+```{r}
+
+comp2012 = BurnIn[c(1,3),] %>%
+  gather(Age, Count,3:20)
+
+ggplot(comp2012[comp2012$Type == "Model",], aes(Age, count)) +
+  geom_bar(stat = "identity")
+
+```
+
