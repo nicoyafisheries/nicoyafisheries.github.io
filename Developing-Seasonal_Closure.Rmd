@@ -106,6 +106,9 @@ Price <- c(0.71,3.25,4.31)
 
 N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
   colnames(N_at) = as.character(c(Age))
+  
+month_N_at <- data.frame(matrix(data = NA, ncol = maxAge, nrow = 12)) 
+  colnames(month_N_at) = as.character(c(Age))   
 
 # Stores number of total eggs produced in each year   
 Eggs <- vector(length = NumYears)
@@ -119,6 +122,10 @@ Biomass <- vector(length = NumYears)
 Catch <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
   colnames(Catch) = as.character(c(Age,'Total'))
 
+  
+Catch.monthly <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = 12)) 
+  colnames(Catch.monthly) = as.character(c(Age,'Year.Total'))  
+  
 # Groups biomass by commercial class multiples by price_cc and sums in each year
 Revenue <- data.frame(matrix(data = NA, ncol = 4, nrow = NumYears)) 
   colnames(Revenue) = c('small',
@@ -209,7 +216,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
   
   #Pristine Inital condition----    
   
-  # #this sets top left
+  # R0 <- unfished recruits
   unfished[1] = R0.
   # 
   # 
@@ -233,7 +240,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
   
   phi <- sum(unfished * fa. * Ma.)
   
-  # no catch in year 1
+
   Catch[1,] = (((Va * F2012) / (Va * F2012 + M)) * N_at[1, ] * (1 - exp(-M - Va * F2012)))*(Weight/1000)
   
   CatchTotal[1] = sum(Catch[1, 1:maxAge])
@@ -266,30 +273,41 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
     N_at[t, 1] = (0.8 * R0. * h. * Eggs[t - 1]) / (0.2 * phi * (1 - h.) + (h. - 0.2) * Eggs[t - 1])
 
-    for (m in 1:12){
+    
+    # monthly survival and catch ---- 
+    
+    for (m in 2:12) {
       
-      #Abundance in each cohort----
-      
-      for (a in 2:(maxAge.)) {
+
         # Introduce fishing as Va*F
         
-        N_at[t, a] = exp(-Mseasonal - Va[a - 1] * F*open[m]) * N_at[(t - 1), (a - 1)]
         
-        # Additional calculation for group maxAge
-        plusGroup = N_at[t, maxAge] + exp(-Mseasonal - Va[maxAge] * F*open[m]) * N_at[(t - 1), (maxAge)]
+        month_N_at[1, ] = exp(-Mseasonal - Va * F*open[1]) * N_at[(t - 1), ]
         
-        N_at[t, maxAge] = plusGroup
         
-        #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t----
         
-        Catch[t, a] = (((Va[a] * F*open[m]) / (Va[a] * F*open[m] + Mseasonal)) * N_at[(t), (a)] * (1 - exp(-Mseasonal - Va[a] * F*open[m])))*(Weight[a]/1000)
+        month_N_at[m, ] = exp(-Mseasonal - Va * F*open[m]) * month_N_at[(m - 1), ]
         
-        Catch[t, 1] = 0
+
         
-      }
-      
+        Catch.monthly[m, ] = (((Va * F*open[m]) / (Va * F*open[m] + Mseasonal)) * month_N_at[m, ] * (1 - exp(-Mseasonal - Va * F*open[m])))*(Weight/1000)
+        
+        
+        Catch[1, ] = 0
+        
     }
+    
     #store results----
+ # Annual abundance
+    
+    N_at[t, ] = lag(month_N_at[12, ])
+    
+    plusGroup = month_N_at[12, maxAge] + month_N_at[12, maxAge - 1]
+        
+    N_at[t, maxAge] = plusGroup
+  
+ # Annual catch       
+    Catch[t, ] = colSums(Catch.monthly)
     
     CatchTotal[t] = sum(Catch[t, 1:maxAge])
     
@@ -297,7 +315,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     # Calculate Egg production for time t----  
     Eggs[t] = sum(N_at[t, ] * fa * Ma)
     
-    #Calculate Revenue by commercial class
+    #Calculate Revenue by commercial class ------
     
     Revenue[t, 1] = sum(Catch[t, 1:2] * Price[1] )
     
@@ -313,7 +331,9 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
   }
   
-  Months.closed = x$months
+  print("got here")
+  
+  Months.closed = x$months[1]
   
   Out = cbind(Months.closed, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
   
