@@ -61,6 +61,9 @@ m50 = 55
 
 m95 = 62.7
 
+#Proportion of Stock that is female
+females = 0.6
+
 #Natural mortality
 M <- K * 1.5
 
@@ -264,7 +267,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
     
     
     # Calculate Egg production for time t----  
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
     
     #Calculate Revenue by commercial class
     

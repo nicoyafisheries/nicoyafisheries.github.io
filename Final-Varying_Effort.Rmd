@@ -61,6 +61,9 @@ m50 = 55
 
 m95 = 62.7
 
+#Proportion of Stock that is female
+females = 0.6
+
 #Natural mortality
 M <- K * 1.5
 
@@ -246,7 +249,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   Va = ifelse(Length < Lc, 0, 1)
   
   #Eggs produced in year 1
-  Eggs[1] = sum(N_at[1, ] * fa. * Ma.)
+  Eggs[1] = sum(N_at[1, ] * fa. * Ma. * females)
   
   phi <- sum(unfished * fa. * Ma.)
   
