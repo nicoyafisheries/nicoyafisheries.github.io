@@ -148,11 +148,13 @@ F.Mortality = vector(length = NumYears)
 #Length at first capture
 Lc = c(32)
 
-Z = seq(M , 1, 0.025)
+Z = seq(M , 0.8, 0.025)
 
 Scenarios = expand.grid(Lc, Z) %>%
             mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
-            select(Label , Z = Var2, Lc = Var1) 
+            select(Label , Z = Var2, Lc = Var1)
+
+
 
 
 InitialCondition <- c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
@@ -161,7 +163,44 @@ InitialCondition <- c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25
   
 ```{r run_model}
 
+# Scenarios
+# 
+# replicate(10, yourCoolModel(Scenarios))
+# 
+# yourCoolModel(Scenarios){
+#   random.mort = rnorm(1, mean = .2, .005)
+#   return(plyr::ddply(Scenarios, 'Label', function(x))
+# }
+# 
 
+# random.mort = rnorm(10, mean = .2, .005)
+# random.mort = rnorm(1, mean = .2, .005)
+# random.length = rnorm(10, mean = .2, .005)
+# random.weight = rnorm(10, mean = 10, 20)
+# label = 1:10
+# test.df = data.frame(random.mort, random.length, random.weight, label)
+# 
+# sum.col = function(x,y,q){
+#   return(x+y + q)
+# }
+# 
+# test.out = plyr::ddply(test.df, 'label', function(x){
+#   return(x$random.mort + x$random.length)
+#   
+# })
+# 
+# test.out2 = plyr::ddply(test.df, "label", summarise, random.mort+random.length)
+# 
+# 
+# test.out3 = plyr::ddply(test.df, "label", summarise, sum.col(random.mort,random.length, 3))
+# 
+# 
+
+
+# 
+# Scenarios
+# plyr::ldply(random.mort,  function(y){
+#   
 Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   
   R0. = R0
@@ -172,6 +211,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   Length. = Length
   Weight. = Weight
   M. = M
+  #M. = y
   
   F = x$Z - M
   
@@ -181,7 +221,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   
   # track model progress
   print(paste("F", F, sep = " = "))
-  
+   
   print(paste("Lc", Lc, sep = " = "))
   
   #Pristine Inital condition----    
@@ -289,6 +329,8 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   return(Out)
 })
 
+#})
+
 
 ```
 
@@ -301,7 +343,8 @@ NPV_effort = Model.full %>%
 
 ggplot(NPV_effort, aes(F.Mortality, NPV )) +
   geom_point() +
-  theme_minimal()
+  theme_minimal() +
+  labs(x = "Effort")
 ```
 
 ```{r}
@@ -310,11 +353,23 @@ F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
 Model.full %>%
   filter(F.Mortality == F_opt) %>%
   mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
-  ggplot(aes(x= year, y = PV)) + 
-  geom_point() + 
+  ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
+  geom_line(aes(color = F.Mortality)) + 
   theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery")
+  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort") 
+
 ```
 
+```{r see_all_paths}
+p1 = Model.full %>%
+  #filter(F.Mortality == F_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
+  ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
+  geom_line(aes(color = F.Mortality)) + 
+  theme_minimal() + 
+  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort") 
+
+plotly::ggplotly(p1)
+```
 
 
