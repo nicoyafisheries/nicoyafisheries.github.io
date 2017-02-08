@@ -284,7 +284,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
         
         month_N_at[1, ] = exp(-Mseasonal - Va * F*open[1]) * N_at[(t - 1), ]
         
-        
+    
         
         month_N_at[m, ] = exp(-Mseasonal - Va * F*open[m]) * month_N_at[(m - 1), ]
         
@@ -293,14 +293,14 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
         Catch.monthly[m, ] = (((Va * F*open[m]) / (Va * F*open[m] + Mseasonal)) * month_N_at[m, ] * (1 - exp(-Mseasonal - Va * F*open[m])))*(Weight/1000)
         
         
-        Catch[1, ] = 0
+        Catch.monthly[1, ] = 0
         
     }
     
     #store results----
  # Annual abundance
     
-    N_at[t, ] = lag(month_N_at[12, ])
+    N_at[t, 2:maxAge. ] = month_N_at[12, 1:maxAge. -1 ] 
     
     plusGroup = month_N_at[12, maxAge] + month_N_at[12, maxAge - 1]
         
@@ -331,7 +331,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
   }
   
-  print("got here")
+
   
   Months.closed = x$months[1]
   
