@@ -146,7 +146,7 @@ Selectivity = vector(length = NumYears)
 #Scenario control-----
 
 #Length at first capture
-Lc = c(31, 30, 38, 45, 62, 70, 76, 101)
+Lc = c(29, 31, 30, 38, 45, 62, 70, 76, 101)
 
 Z = Z.2012
 
@@ -310,10 +310,24 @@ Lc_opt = NPV_selectivity$Selectivity[which.max(NPV_selectivity$NPV)]
 
 Model.full %>%
   filter(Selectivity == Lc_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
-  ggplot(aes(x= year, y = PV)) + 
-  geom_point() + 
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x= year, y = PV, group = Selectivity)) + 
+  geom_line(aes(color = Selectivity)) + 
   theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery")
+  labs(y = "Discounted Profit from Corvina Reina fishery")
 
 ```
+
+```{r see_all_paths}
+
+p2=   Model.full %>%
+  #filter(Selectivity == Lc_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x= year, y = PV, group = Selectivity)) + 
+  geom_line(aes(color = Selectivity)) + 
+  theme_minimal() + 
+  labs(y = "Discounted Profit from Corvina Reina fishery")
+
+plotly::ggplotly(p2)
+```
+
