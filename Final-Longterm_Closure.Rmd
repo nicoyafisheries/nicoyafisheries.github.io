@@ -383,7 +383,7 @@ NPV_closure = Model.full %>%
             group_by(YearsClosed) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-pdf("NPV_closure.pdf")
+#pdf("./plots/NPV_closure.pdf")
 
 p = ggplot(NPV_closure, aes(YearsClosed, NPV )) +
       geom_point() +
@@ -395,7 +395,7 @@ p = ggplot(NPV_closure, aes(YearsClosed, NPV )) +
 MyTheme(p)  
 
 
-dev.off()
+#dev.off()
 ```
 
 

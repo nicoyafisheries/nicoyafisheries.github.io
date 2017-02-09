@@ -364,7 +364,7 @@ NPV_effort = Model.full %>%
             group_by(F.Mortality) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-#pdf("NPV_effort.pdf")
+#pdf("./plots/NPV_effort.pdf")
 
 p = ggplot(NPV_effort, aes(F.Mortality, NPV )) +
       geom_point() +

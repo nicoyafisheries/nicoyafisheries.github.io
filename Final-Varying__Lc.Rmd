@@ -302,7 +302,7 @@ NPV_selectivity = Model.full %>%
             group_by(Selectivity) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-#pdf("NPV_selectivity.pdf")
+#pdf("./plots/NPV_selectivity.pdf")
 
 p = ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
       geom_point() +
