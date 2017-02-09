@@ -362,7 +362,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
 
 NPV_effort = Model.full %>%
             group_by(F.Mortality) %>%
-            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year)))
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
 #pdf("NPV_effort.pdf")
 
@@ -384,7 +384,7 @@ F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
 
 Model.full %>%
   filter(F.Mortality == F_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
   geom_line(aes(color = F.Mortality)) + 
   theme_minimal() + 
@@ -395,7 +395,7 @@ Model.full %>%
 ```{r see_all_paths}
 p1 = Model.full %>%
   #filter(F.Mortality == F_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
   geom_line(aes(color = F.Mortality)) + 
   theme_minimal() + 
