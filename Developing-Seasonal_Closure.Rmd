@@ -61,6 +61,8 @@ m50 = 55
 
 m95 = 62.7
 
+females = 0.6
+
 #Natural mortality
 M <- K * 1.5
 
@@ -157,17 +159,17 @@ Lc = 32
 
 Z = Z.2012
 
-seasonal.grid = data.frame(one = c(0, rep(1, 11)),
-                       two = c(0,0, rep(1, 10)),
-                       three = c(0,0,0, rep(1, 9)), 
-                       four = c(0,0,0,0, rep(1, 8)),
-                       five = c(0,0,0,0,0, rep(1,7)), 
-                       six = c(rep(0, 6), rep(1,6)),
-                       seven = c(rep(0,7), rep(1,5) ),
-                       eight = c(rep(0,8), rep(1,4)),
-                       nine = c(rep(0,9), rep(1,3)),
-                       ten = c(rep(0,10), 1, 1), 
-                       eleven = c(rep(0,11), 1)) 
+seasonal.grid = tibble("1" = c(0, rep(1, 11)),
+                       "2" = c(0,0, rep(1, 10)),
+                       "3" = c(0,0,0, rep(1, 9)), 
+                       "4" = c(0,0,0,0, rep(1, 8)),
+                       "5" = c(0,0,0,0,0, rep(1,7)), 
+                       "6" = c(rep(0, 6), rep(1,6)),
+                       "7" = c(rep(0,7), rep(1,5) ),
+                       "8" = c(rep(0,8), rep(1,4)),
+                       "9" = c(rep(0,9), rep(1,3)),
+                       "10" = c(rep(0,10), 1, 1), 
+                       "11" = c(rep(0,11), 1)) 
                           
 Scenarios = gather(seasonal.grid, months, c)
 
@@ -313,7 +315,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
        
     # Calculate Egg production for time t----  
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
     
     #Calculate Revenue by commercial class ------
     
@@ -327,7 +329,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
     Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
     
-    Profit[t] = RevenueTotal[t] - c*F
+    Profit[t] = RevenueTotal[t] - c*(F)*sum(open)
     
   }
   
@@ -346,23 +348,36 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
 
 ```{r NPV}
 
-NPV_effort = Model.full %>%
-            group_by(F.Mortality) %>%
-            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year)))
+NPV_seasonal = Model.full %>%
+            group_by(Months.closed) %>%
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year))) %>%
+            mutate(xval  = as.numeric(as.character(Months.closed)))
 
-ggplot(NPV_effort, aes(F.Mortality, NPV )) +
+
+ggplot(NPV_seasonal, aes(xval,  NPV )) +
   geom_point() +
   theme_minimal()
 ```
 
 ```{r}
-F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
+seasonal_opt = NPV_seasonal$Months.closed[which.max(NPV_seasonal$NPV)]
 
 Model.full %>%
-  filter(F.Mortality == F_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
-  ggplot(aes(x= year, y = PV)) + 
+  filter(Months.closed == seasonal_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x = year, y = PV)) + 
   geom_point() + 
+  theme_minimal() + 
+  labs(y = "Discount Profit from Corvina Reina fishery")
+```
+
+
+```{r}
+Model.full %>%
+  #filter(Months.closed == seasonal_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x = year, y = PV, , group = Months.closed)) + 
+  geom_line(aes(color = Months.closed)) + 
   theme_minimal() + 
   labs(y = "Discount Profit from Corvina Reina fishery")
 ```
