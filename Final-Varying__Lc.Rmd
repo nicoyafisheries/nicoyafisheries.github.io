@@ -320,12 +320,13 @@ MyTheme(p)
 Lc_opt = NPV_selectivity$Selectivity[which.max(NPV_selectivity$NPV)]
 
 
+
 Model.full %>%
   filter(Selectivity == Lc_opt) %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
-  ggplot(aes(x= year, y = PV, group = Selectivity)) + 
-  geom_line(aes(color = Selectivity)) + 
-  theme_minimal() + 
+  ggplot(aes(x = year, y = PV, group = Selectivity)) +
+  geom_line(aes(color = Selectivity)) +
+  theme_minimal() +
   labs(y = "Discounted Profit from Corvina Reina fishery")
 
 ```
@@ -341,5 +342,16 @@ p2=   Model.full %>%
   labs(y = "Discounted Profit from Corvina Reina fishery")
 
 plotly::ggplotly(p2)
+```
+
+```{r write_out_data}
+
+write.csv(Model.full, "./data/Model_Output/Out_Selectivity.csv")
+
+
+write.csv(NPV_selectivity, "./data/Model_Output/NPV_Selectivity.csv")
+
+
+
 ```
 

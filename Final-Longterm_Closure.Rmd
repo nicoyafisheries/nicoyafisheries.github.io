@@ -1,5 +1,5 @@
 ---
-title: "Vary F holding 2012 Lc values"
+title: "Long term closures holding 2012 F and Lc values"
 author: "Alex Smith"
 date: "February 5, 2017"
 output: html_document
@@ -140,7 +140,7 @@ CatchTotal = vector(length = NumYears)
 
 year = vector(length = NumYears)
 
-F.Mortality = vector(length = NumYears)
+YearsClosed = vector(length = NumYears)
 
 ```
   
@@ -151,11 +151,24 @@ F.Mortality = vector(length = NumYears)
 #Length at first capture
 Lc = c(32)
 
-Z = seq(M , 0.8, 0.025)
 
-Scenarios = expand.grid(Lc, Z) %>%
-            mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
-            select(Label , Z = Var2, Lc = Var1)
+Z = data.frame(matrix(data = NA, ncol = NumYears + 1, nrow = NumYears)) %>%
+  rename( YearsClosed = X1)
+
+for (j in 1:NumYears){
+  
+
+  Z[j, 1] = j
+  
+  Z[j, 2:(NumYears +1)] = c(rep(0, j), rep(Z.2012, (NumYears - j ) ) )
+  
+  
+}
+
+
+# Scenarios = expand.grid(Lc, Z) %>%
+#             mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
+#             select(Label , Z = Var2, Lc = Var1)
 
 
 
@@ -204,7 +217,7 @@ InitialCondition <- c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25
 # Scenarios
 # plyr::ldply(random.mort,  function(y){
 #   
-Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
+Model.full = plyr::ddply(Z, 'YearsClosed', function(x) {
   R0. = R0
   maxAge. = maxAge
   h. = h
@@ -215,14 +228,14 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   M. = M
   #M. = y
   
-  F = x$Z - M
+ 
   
   F2012 = Z.2012 - M
   
-  Lc = x$Lc
+  Lc = Lc
   
   # track model progress
-  print(paste("F", F, sep = " = "))
+
   
   print(paste("Lc", Lc, sep = " = "))
   
@@ -280,6 +293,11 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
 ################################################    
    
   for (t in 2:NumYears) {
+    
+  F = max(x[t] - M, 0)
+    
+  print(paste("F", F, sep = " = "))
+  
   year[t] = t - 1
   
   #Beverton-Holt spawner recruit relationship-----
@@ -338,9 +356,9 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   
   }
   
-  F.Mortality = F
+  YearsClosed = x[1,1]
   
-  Out = cbind(F.Mortality,
+  Out = cbind(YearsClosed,
               year,
               N_at,
               CatchTotal,
@@ -358,48 +376,50 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
 ```
 
 
+
 ```{r NPV}
 
-NPV_effort = Model.full %>%
-            group_by(F.Mortality) %>%
+NPV_closure = Model.full %>%
+            group_by(YearsClosed) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-#pdf("NPV_effort.pdf")
+pdf("NPV_closure.pdf")
 
-p = ggplot(NPV_effort, aes(F.Mortality, NPV )) +
+p = ggplot(NPV_closure, aes(YearsClosed, NPV )) +
       geom_point() +
-      scale_x_continuous(breaks = c(seq(0,1,0.1))) +
-      scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
+      scale_x_continuous(breaks = c(seq(0,25,2))) +
+      scale_y_continuous(breaks = c(seq(0,8000,2000))) +
       geom_hline(yintercept = 0, alpha =0.5, lty =2) +
-      labs(x = "Effort")
+      labs(x = "closure")
   
 MyTheme(p)  
 
 
-#dev.off()
+dev.off()
 ```
 
+
 ```{r}
-F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
+close_opt = NPV_closure$YearsClosed[which.max(NPV_closure$NPV)]
 
 Model.full %>%
-  filter(F.Mortality == F_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
-  ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
-  geom_line(aes(color = F.Mortality)) + 
+  filter(YearsClosed == close_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
+  ggplot(aes(x= year, y = PV, group = YearsClosed)) + 
+  geom_line(aes(color = YearsClosed)) + 
   theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort") 
+  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "closure") 
 
 ```
 
 ```{r see_all_paths}
 p1 = Model.full %>%
-  #filter(F.Mortality == F_opt) %>%
+  #filter(YearsClosed == F_opt) %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
-  ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
-  geom_line(aes(color = F.Mortality)) + 
+  ggplot(aes(x= year, y = PV, group = YearsClosed)) + 
+  geom_line(aes(color = YearsClosed)) + 
   theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort")  +
+  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "closure")  +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
     theme(axis.text.x = element_text(size=17),
           axis.text.y = element_text(size=17),
@@ -408,7 +428,7 @@ p1 = Model.full %>%
   
 
 
-#pdf("PathAllEffort.pdf")
+#pdf("PathAllclosure.pdf")
 
 
 plotly::ggplotly(p1)
@@ -417,10 +437,10 @@ plotly::ggplotly(p1)
 
 ```{r write_out_data}
 
-write.csv(Model.full, "./data/Model_Output/Out_Effort.csv")
+write.csv(Model.full, "./data/Model_Output/Out_closure.csv")
 
 
-write.csv(NPV_effort, "./data/Model_Output/NPV_Effort.csv")
+write.csv(NPV_closure, "./data/Model_Output/NPV_closure.csv")
 
 
 
