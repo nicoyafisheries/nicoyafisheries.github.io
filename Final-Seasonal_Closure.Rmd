@@ -36,7 +36,7 @@ library(tidyverse)
 sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 
 #Set Model----
-NumYears = 50
+NumYears = 25
 
 R0 = 1000
 
@@ -348,16 +348,25 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
 
 ```{r NPV}
 
+
+
 NPV_seasonal = Model.full %>%
             group_by(Months.closed) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year))) %>%
             mutate(xval  = as.numeric(as.character(Months.closed)))
 
+#pdf("NPV_seasonal.pdf")
 
-ggplot(NPV_seasonal, aes(xval,  NPV )) +
+p = ggplot(NPV_seasonal, aes(xval,  NPV )) +
+  scale_x_continuous(breaks = c(seq(1,11,1))) +
   geom_point() +
-  labs(x = "number of months closed to fishing") +
-  theme_minimal()
+  geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+  labs(x = "number of months closed to fishing") 
+
+
+MyTheme(p)
+
+#dev.off()
 ```
 
 ```{r}

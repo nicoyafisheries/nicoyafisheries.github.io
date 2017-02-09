@@ -302,9 +302,18 @@ NPV_selectivity = Model.full %>%
             group_by(Selectivity) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
-  geom_point() +
-  theme_minimal()
+#pdf("NPV_selectivity.pdf")
+
+p = ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
+      geom_point() +
+      labs(x = "Gear Selectivity (length at first capture)") +
+      scale_x_continuous(breaks = c(seq(20,110,10))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) 
+
+MyTheme(p)
+
+#dev.off()
+  
 ```
 
 ```{r}
