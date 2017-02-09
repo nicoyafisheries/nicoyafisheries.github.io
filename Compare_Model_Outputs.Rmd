@@ -28,6 +28,8 @@ selectivity =  read_csv("./data/Model_Output/Out_Selectivity.csv")
 
 seasonal =  read_csv("./data/Model_Output/Out_Season.csv")
 
+closure = read_csv("./data/Model_Output/Out_closure.csv")
+
 #NPV
 
 NPV_effort = read.csv( "./data/Model_Output/NPV_Effort.csv") %>%
@@ -41,8 +43,12 @@ NPV_selectivity = read.csv( "./data/Model_Output/NPV_Selectivity.csv") %>%
 NPV_seasonal = read.csv( "./data/Model_Output/NPV_Season.csv") %>%
   mutate(Type = "seasonal") %>%
   rename(Value = Months.closed)
+
+NPV_closure = read.csv( "./data/Model_Output/NPV_closure.csv") %>%
+  mutate(Type = "closure") %>%
+  rename(Value = YearsClosed)
   
-NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1])
+NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1], NPV_closure[,-1])
 
 ```
 
@@ -74,13 +80,20 @@ effort_opt = effort %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   mutate(Type = "Effort Control")
 
+closure_opt = closure %>%
+  filter(YearsClosed == NPV_closure$Value[which.max(NPV_closure$NPV)]) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  mutate(Type = "Longterm Closure")
+
 PV_plot = rbind(seasonal_opt[, c(4, 27, 28)], 
                 selectivity_opt[, c(4, 27, 28)], 
-                effort_opt[, c(4, 27, 28)])
+                effort_opt[, c(4, 27, 28)],
+                closure_opt[, c(3, 26, 27)])
                     
 
 ggplot(PV_plot, aes( year, PV, group = Type))+
   geom_line(aes(color = Type)) +
+  labs(x = "Time (years)", y = "Discounted profits (USD)", color = "Management \nIntervention") +
   theme_minimal()
   
 
