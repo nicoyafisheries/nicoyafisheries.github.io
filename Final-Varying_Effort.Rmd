@@ -205,7 +205,6 @@ InitialCondition <- c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25
 # plyr::ldply(random.mort,  function(y){
 #   
 Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
-  
   R0. = R0
   maxAge. = maxAge
   h. = h
@@ -224,24 +223,29 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   
   # track model progress
   print(paste("F", F, sep = " = "))
-   
+  
   print(paste("Lc", Lc, sep = " = "))
   
-  #Pristine Inital condition----    
+  #Pristine Inital condition----
   
   # #this sets top left
   unfished[1] = R0.
-  # 
-  # 
+
+  
   # estimate age structure of unfished pop
   for (a in 2:(maxAge.)) {
-    unfished[a] = unfished[ (a - 1)] * exp(-M.)
-    
+  
+    unfished[a] = unfished[(a - 1)] * exp(-M.)
+  
   }
+
+################################################
+# INITALIZE MODEL
+################################################  
   
   
   #Overfished Inital condition-----
-  N_at[1,] = InitialCondition
+  N_at[1, ] = InitialCondition
   
   Biomass[1] = sum(N_at[1, 1:maxAge.] * Weight.)
   
@@ -249,87 +253,103 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
   Va = ifelse(Length < Lc, 0, 1)
   
   #Eggs produced in year 1
-  Eggs[1] = sum(N_at[1, ] * fa. * Ma. * females)
+  Eggs[1] = sum(N_at[1,] * fa. * Ma. * females)
   
   phi <- sum(unfished * fa. * Ma.)
   
   # no catch in year 1
-  Catch[1,] = (((Va * F2012) / (Va * F2012 + M)) * N_at[1, ] * (1 - exp(-M - Va * F2012)))*(Weight/1000)
+  Catch[1, ] = (((Va * F2012) / (Va * F2012 + M)) * N_at[1,] * (1 - exp(-M - Va * F2012))) * (Weight / 1000)
   
   CatchTotal[1] = sum(Catch[1, 1:maxAge])
   
   # no revenue in year 1
-  Revenue[1, 1] = sum(Catch[1, 1:2] * Price[1] )
+  Revenue[1, 1] = sum(Catch[1, 1:2] * Price[1])
   
-  Revenue[1, 2] = sum( Catch[1, 3:4] * Price[2] )
+  Revenue[1, 2] = sum(Catch[1, 3:4] * Price[2])
   
-  Revenue[1, 3] = sum(Catch[1, 5:maxAge.] * Price[3] )
+  Revenue[1, 3] = sum(Catch[1, 5:maxAge.] * Price[3])
   
   RevenueTotal[1] = sum(Revenue[1, 1:3])
   
   #Estimate marginal cost
   
   c = RevenueTotal[1] / F2012
-  
+ 
+################################################
+# CALCULATE ANNUAL CATCH AND ABUNDANCE
+################################################    
+   
   for (t in 2:NumYears) {
-    
-    year[t] = t - 1 
-    
-    #Beverton-Holt spawner recruit relationship-----
-    
-    N_at[t, 1] = (0.8 * R0. * h. * Eggs[t - 1]) / (0.2 * phi * (1 - h.) + (h. - 0.2) * Eggs[t - 1])
-    
-    
-    #Abundance in each cohort----
-    
-    for (a in 2:(maxAge.)) {
-      # Introduce fishing as Va*F
-        
-        N_at[t, a] = exp(-M. - Va[a - 1] * F) * N_at[(t - 1), (a - 1)]
-        
-        # Additional calculation for group maxAge
-        plusGroup = N_at[t, maxAge] + exp(-M - Va[maxAge] * F) * N_at[(t - 1), (maxAge)]
-        
-        N_at[t, maxAge] = plusGroup
-        
-        #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t----
-        
-        Catch[t, a] = (((Va[a] * F) / (Va[a] * F + M)) * N_at[(t), (a)] * (1 - exp(-M - Va[a] * F)))*(Weight[a]/1000)
-        
-        Catch[t, 1] = 0
-      
-    }
-    
-    #store results----
-    
-    CatchTotal[t] = sum(Catch[t, 1:maxAge])
-    
-    
-    
-    # Calculate Egg production for time t----  
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
-    
-    #Calculate Revenue by commercial class
-    
-    Revenue[t, 1] = sum(Catch[t, 1:2] * Price[1] )
-    
-    Revenue[t, 2] = sum( Catch[t, 3:4] * Price[2] )
-    
-    Revenue[t, 3] = sum(Catch[t, 5:maxAge.] * Price[3] )
-    
-    RevenueTotal[t] = sum(Revenue[t, 1:3])
-    
-    Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
-    
-    Profit[t] = RevenueTotal[t] - c*F
-    
+  year[t] = t - 1
+  
+  #Beverton-Holt spawner recruit relationship-----
+  
+  N_at[t, 1] = (0.8 * R0. * h. * Eggs[t - 1]) / (0.2 * phi * (1 - h.) + (h. - 0.2) * Eggs[t - 1])
+  
+  
+  #Abundance in each cohort----
+  
+  for (a in 2:(maxAge.)) {
+  # Introduce fishing as Va*F
+  
+  N_at[t, a] = exp(-M. - Va[a - 1] * F) * N_at[(t - 1), (a - 1)]
+  
+  # Additional calculation for group maxAge
+  plusGroup = N_at[t, maxAge] + exp(-M - Va[maxAge] * F) * N_at[(t - 1), (maxAge)]
+  
+  N_at[t, maxAge] = plusGroup
+  
+  #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t----
+  
+  Catch[t, a] = (((Va[a] * F) / (Va[a] * F + M)) * N_at[(t), (a)] * (1 - exp(-M - Va[a] * F))) *
+  (Weight[a] / 1000)
+  
+  Catch[t, 1] = 0
+  
+  }
+  
+  #store results----
+  
+  CatchTotal[t] = sum(Catch[t, 1:maxAge])
+  
+  
+  
+  # Calculate Egg production for time t----
+  Eggs[t] = sum(N_at[t,] * fa * Ma)
+  
+  #Calculate Revenue by commercial class-----
+  
+  Revenue[t, 1] = sum(Catch[t, 1:2] * Price[1])
+  
+  Revenue[t, 2] = sum(Catch[t, 3:4] * Price[2])
+  
+  Revenue[t, 3] = sum(Catch[t, 5:maxAge.] * Price[3])
+  
+  RevenueTotal[t] = sum(Revenue[t, 1:3])
+  
+  
+  # Biomass-----
+  
+  Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
+  
+  # Profit-----
+  
+  Profit[t] = RevenueTotal[t] - c * F
+  
   }
   
   F.Mortality = F
   
-  Out = cbind(F.Mortality, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
+  Out = cbind(F.Mortality,
+              year,
+              N_at,
+              CatchTotal,
+              RevenueTotal,
+              Biomass,
+              Profit)
   
   return(Out)
+  
 })
 
 #})
@@ -370,7 +390,17 @@ p1 = Model.full %>%
   ggplot(aes(x= year, y = PV, group = F.Mortality)) + 
   geom_line(aes(color = F.Mortality)) + 
   theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort") 
+  labs(y = "Discount Profit from Corvina Reina fishery", x = "Year", color = "Effort")  +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank() ,axis.line = element_line(colour = "black")) +
+    theme(axis.text.x = element_text(size=17),
+          axis.text.y = element_text(size=17),
+          axis.title.x = element_text(size=18),
+          axis.title.y = element_text(size=18))
+  
+
+
+#pdf("PathAllEffort.pdf")
+
 
 plotly::ggplotly(p1)
 ```

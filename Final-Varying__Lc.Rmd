@@ -300,7 +300,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
 
 NPV_selectivity = Model.full %>%
             group_by(Selectivity) %>%
-            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year)))
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
 ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
   geom_point() +

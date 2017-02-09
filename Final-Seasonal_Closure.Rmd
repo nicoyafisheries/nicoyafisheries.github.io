@@ -36,7 +36,7 @@ library(tidyverse)
 sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 
 #Set Model----
-NumYears = 25
+NumYears = 50
 
 R0 = 1000
 
@@ -356,6 +356,7 @@ NPV_seasonal = Model.full %>%
 
 ggplot(NPV_seasonal, aes(xval,  NPV )) +
   geom_point() +
+  labs(x = "number of months closed to fishing") +
   theme_minimal()
 ```
 
