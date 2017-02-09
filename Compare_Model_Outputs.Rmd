@@ -1,0 +1,88 @@
+---
+author: "Alex Smith"
+date: "2/8/2017"
+output: html_document
+---
+
+Compare optimal selection across strategies
+
+
+```{r setup, include=FALSE}
+
+rm(list=ls())
+
+library(colorRamps)
+library(tidyverse)
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+```
+
+```{r load_data, warning=FALSE}
+
+# Full Model Output
+
+effort = read_csv("./data/Model_Output/Out_Effort.csv")
+
+selectivity =  read_csv("./data/Model_Output/Out_Selectivity.csv")
+
+seasonal =  read_csv("./data/Model_Output/Out_Season.csv")
+
+#NPV
+
+NPV_effort = read.csv( "./data/Model_Output/NPV_Effort.csv") %>%
+  mutate(Type = "effort") %>%
+  rename(Value = F.Mortality)
+
+NPV_selectivity = read.csv( "./data/Model_Output/NPV_Selectivity.csv") %>%
+  mutate(Type = "selectivity") %>%
+  rename(Value = Selectivity)
+
+NPV_seasonal = read.csv( "./data/Model_Output/NPV_Season.csv") %>%
+  mutate(Type = "seasonal") %>%
+  rename(Value = Months.closed)
+  
+NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1])
+
+```
+
+```{r}
+p =ggplot(NPV_all, aes(factor(Type), NPV)) +
+    geom_boxplot() +
+    labs(x = "Management Intervention") +
+    scale_y_continuous(breaks = c(seq(-15000,17000,5000)))
+
+MyTheme(p)
+```
+
+
+```{r opt}
+
+
+seasonal_opt = seasonal %>%
+  filter(Months.closed == NPV_seasonal$Value[which.max(NPV_seasonal$NPV)]) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  mutate(Type = "Seasonal Closure")
+
+selectivity_opt = selectivity %>%
+  filter(Selectivity == NPV_selectivity$Value[which.max(NPV_selectivity$NPV)]) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year))%>%
+  mutate(Type = "Gear Selectivity")
+
+effort_opt = effort %>%
+  filter(F.Mortality == NPV_effort$Value[which.max(NPV_effort$NPV)]) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  mutate(Type = "Effort Control")
+
+PV_plot = rbind(seasonal_opt[, c(4, 27, 28)], 
+                selectivity_opt[, c(4, 27, 28)], 
+                effort_opt[, c(4, 27, 28)])
+                    
+
+ggplot(PV_plot, aes( year, PV, group = Type))+
+  geom_line(aes(color = Type)) +
+  theme_minimal()
+  
+
+```
+
