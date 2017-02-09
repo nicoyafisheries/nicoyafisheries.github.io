@@ -415,3 +415,13 @@ plotly::ggplotly(p1)
 ```
 
 
+```{r write_out_data}
+
+write.csv(Model.full, "./data/Model_Output/Out_Effort.csv")
+
+
+write.csv(NPV_effort, "./data/Model_Output/NPV_Effort.csv")
+
+
+
+```
