@@ -305,7 +305,7 @@ NPV_selectivity = Model.full %>%
 #pdf("./plots/NPV_selectivity.pdf")
 
 p = ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
-      geom_point() +
+      geom_point(size = 3) +
       labs(x = "Gear Selectivity (length at first capture)") +
       scale_x_continuous(breaks = c(seq(20,110,10))) +
       geom_hline(yintercept = 0, alpha =0.5, lty =2) 

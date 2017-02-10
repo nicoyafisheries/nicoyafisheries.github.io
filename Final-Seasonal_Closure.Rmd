@@ -359,7 +359,7 @@ NPV_seasonal = Model.full %>%
 
 p = ggplot(NPV_seasonal, aes(Months.closed,  NPV )) +
   scale_x_continuous(breaks = c(seq(1,11,1))) +
-  geom_point() +
+  geom_point(size = 3) +
   geom_hline(yintercept = 0, alpha =0.5, lty =2) +
   labs(x = "number of months closed annually to fishing") 
 
@@ -383,13 +383,15 @@ Model.full %>%
 
 
 ```{r}
-Model.full %>%
+p =Model.full %>%
   #filter(Months.closed == seasonal_opt) %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   ggplot(aes(x = year, y = PV, , group = Months.closed)) + 
   geom_line(aes(color = Months.closed)) + 
   theme_minimal() + 
   labs(y = "Discount Profit from Corvina Reina fishery")
+
+plotly::ggplotly(p)
 ```
 
 ```{r write_out_data}

@@ -54,7 +54,7 @@ NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1], NPV_c
 
 ```{r}
 
-pdf("./plots/compare_NPV.pdf") 
+#pdf("./plots/compare_NPV.pdf") 
 
 p =ggplot(NPV_all, aes(factor(Type), NPV)) +
     geom_boxplot() +
@@ -64,7 +64,7 @@ p =ggplot(NPV_all, aes(factor(Type), NPV)) +
 
 MyTheme(p)
 
-dev.off()
+#dev.off()
 ```
 
 
@@ -96,7 +96,7 @@ PV_plot = rbind(seasonal_opt[, c(4, 27, 28)],
                 effort_opt[, c(4, 27, 28)],
                 closure_opt[, c(3, 26, 27)])
 
-pdf("./plots/compare_opt.pdf")                    
+#pdf("./plots/compare_opt.pdf")                    
 
 p = ggplot(PV_plot, aes( year, PV, group = Type)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
@@ -107,6 +107,6 @@ p = ggplot(PV_plot, aes( year, PV, group = Type)) +
 
 MyTheme(p)  
 
-dev.off()
+#dev.off()
 ```
 
