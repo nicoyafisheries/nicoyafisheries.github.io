@@ -364,10 +364,10 @@ NPV_effort = Model.full %>%
             group_by(F.Mortality) %>%
             summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-#pdf("NPV_effort.pdf")
+#pdf("./plots/NPV_effort.pdf")
 
 p = ggplot(NPV_effort, aes(F.Mortality, NPV )) +
-      geom_point() +
+      geom_point(size = 3) +
       scale_x_continuous(breaks = c(seq(0,1,0.1))) +
       scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
       geom_hline(yintercept = 0, alpha =0.5, lty =2) +

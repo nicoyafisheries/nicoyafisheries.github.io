@@ -53,12 +53,18 @@ NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1], NPV_c
 ```
 
 ```{r}
+
+#pdf("./plots/compare_NPV.pdf") 
+
 p =ggplot(NPV_all, aes(factor(Type), NPV)) +
     geom_boxplot() +
+    geom_hline(yintercept = 0, alpha = 0.5, lty = 2) +
     labs(x = "Management Intervention") +
     scale_y_continuous(breaks = c(seq(-15000,17000,5000)))
 
 MyTheme(p)
+
+#dev.off()
 ```
 
 
@@ -89,13 +95,18 @@ PV_plot = rbind(seasonal_opt[, c(4, 27, 28)],
                 selectivity_opt[, c(4, 27, 28)], 
                 effort_opt[, c(4, 27, 28)],
                 closure_opt[, c(3, 26, 27)])
-                    
 
-ggplot(PV_plot, aes( year, PV, group = Type))+
+#pdf("./plots/compare_opt.pdf")                    
+
+p = ggplot(PV_plot, aes( year, PV, group = Type)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
   geom_line(aes(color = Type)) +
+  scale_y_continuous(breaks = c(seq(-100,2000,300))) +
   labs(x = "Time (years)", y = "Discounted profits (USD)", color = "Management \nIntervention") +
   theme_minimal()
-  
 
+MyTheme(p)  
+
+#dev.off()
 ```
 
