@@ -61,6 +61,9 @@ m50 = 55
 
 m95 = 62.7
 
+#Proportion of Stock that is female
+females = 0.6
+
 #Natural mortality
 M <- K * 1.5
 
@@ -146,7 +149,7 @@ Selectivity = vector(length = NumYears)
 #Scenario control-----
 
 #Length at first capture
-Lc = c(31, 30, 38, 45, 62, 70, 76, 101)
+Lc = c(29, 31, 30, 38, 45, 62, 70, 76, 101)
 
 Z = Z.2012
 
@@ -264,7 +267,7 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
     
     
     # Calculate Egg production for time t----  
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
     
     #Calculate Revenue by commercial class
     
@@ -297,23 +300,58 @@ Model.full = plyr::ddply(Scenarios, 'Label', function(x) {
 
 NPV_selectivity = Model.full %>%
             group_by(Selectivity) %>%
-            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year)))
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
 
-ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
-  geom_point() +
-  theme_minimal()
+#pdf("./plots/NPV_selectivity.pdf")
+
+p = ggplot(NPV_selectivity, aes(Selectivity, NPV )) +
+      geom_point(size = 3) +
+      labs(x = "Gear Selectivity (length at first capture)") +
+      scale_x_continuous(breaks = c(seq(20,110,10))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) 
+
+MyTheme(p)
+
+#dev.off()
+  
 ```
 
 ```{r}
 Lc_opt = NPV_selectivity$Selectivity[which.max(NPV_selectivity$NPV)]
 
 
+
 Model.full %>%
   filter(Selectivity == Lc_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
-  ggplot(aes(x= year, y = PV)) + 
-  geom_point() + 
-  theme_minimal() + 
-  labs(y = "Discount Profit from Corvina Reina fishery")
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x = year, y = PV, group = Selectivity)) +
+  geom_line(aes(color = Selectivity)) +
+  theme_minimal() +
+  labs(y = "Discounted Profit from Corvina Reina fishery")
 
 ```
+
+```{r see_all_paths}
+
+p2=   Model.full %>%
+  #filter(Selectivity == Lc_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x= year, y = PV, group = Selectivity)) + 
+  geom_line(aes(color = Selectivity)) + 
+  theme_minimal() + 
+  labs(y = "Discounted Profit from Corvina Reina fishery")
+
+plotly::ggplotly(p2)
+```
+
+```{r write_out_data}
+
+write.csv(Model.full, "./data/Model_Output/Out_Selectivity.csv")
+
+
+write.csv(NPV_selectivity, "./data/Model_Output/NPV_Selectivity.csv")
+
+
+
+```
+

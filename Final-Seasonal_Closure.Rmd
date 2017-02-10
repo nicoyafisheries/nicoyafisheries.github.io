@@ -61,6 +61,8 @@ m50 = 55
 
 m95 = 62.7
 
+females = 0.6
+
 #Natural mortality
 M <- K * 1.5
 
@@ -106,6 +108,9 @@ Price <- c(0.71,3.25,4.31)
 
 N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
   colnames(N_at) = as.character(c(Age))
+  
+month_N_at <- data.frame(matrix(data = NA, ncol = maxAge, nrow = 12)) 
+  colnames(month_N_at) = as.character(c(Age))   
 
 # Stores number of total eggs produced in each year   
 Eggs <- vector(length = NumYears)
@@ -119,6 +124,10 @@ Biomass <- vector(length = NumYears)
 Catch <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = NumYears)) 
   colnames(Catch) = as.character(c(Age,'Total'))
 
+  
+Catch.monthly <- data.frame(matrix(data = NA, ncol = max(Age) + 1, nrow = 12)) 
+  colnames(Catch.monthly) = as.character(c(Age,'Year.Total'))  
+  
 # Groups biomass by commercial class multiples by price_cc and sums in each year
 Revenue <- data.frame(matrix(data = NA, ncol = 4, nrow = NumYears)) 
   colnames(Revenue) = c('small',
@@ -150,17 +159,17 @@ Lc = 32
 
 Z = Z.2012
 
-seasonal.grid = data.frame(one = c(0, rep(1, 11)),
-                       two = c(0,0, rep(1, 10)),
-                       three = c(0,0,0, rep(1, 9)), 
-                       four = c(0,0,0,0, rep(1, 8)),
-                       five = c(0,0,0,0,0, rep(1,7)), 
-                       six = c(rep(0, 6), rep(1,6)),
-                       seven = c(rep(0,7), rep(1,5) ),
-                       eight = c(rep(0,8), rep(1,4)),
-                       nine = c(rep(0,9), rep(1,3)),
-                       ten = c(rep(0,10), 1, 1), 
-                       eleven = c(rep(0,11), 1)) 
+seasonal.grid = tibble("1" = c(0, rep(1, 11)),
+                       "2" = c(0,0, rep(1, 10)),
+                       "3" = c(0,0,0, rep(1, 9)), 
+                       "4" = c(0,0,0,0, rep(1, 8)),
+                       "5" = c(0,0,0,0,0, rep(1,7)), 
+                       "6" = c(rep(0, 6), rep(1,6)),
+                       "7" = c(rep(0,7), rep(1,5) ),
+                       "8" = c(rep(0,8), rep(1,4)),
+                       "9" = c(rep(0,9), rep(1,3)),
+                       "10" = c(rep(0,10), 1, 1), 
+                       "11" = c(rep(0,11), 1)) 
                           
 Scenarios = gather(seasonal.grid, months, c)
 
@@ -209,7 +218,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
   
   #Pristine Inital condition----    
   
-  # #this sets top left
+  # R0 <- unfished recruits
   unfished[1] = R0.
   # 
   # 
@@ -233,7 +242,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
   
   phi <- sum(unfished * fa. * Ma.)
   
-  # no catch in year 1
+
   Catch[1,] = (((Va * F2012) / (Va * F2012 + M)) * N_at[1, ] * (1 - exp(-M - Va * F2012)))*(Weight/1000)
   
   CatchTotal[1] = sum(Catch[1, 1:maxAge])
@@ -266,38 +275,49 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
     N_at[t, 1] = (0.8 * R0. * h. * Eggs[t - 1]) / (0.2 * phi * (1 - h.) + (h. - 0.2) * Eggs[t - 1])
 
-    for (m in 1:12){
+    
+    # monthly survival and catch ---- 
+    
+    for (m in 2:12) {
       
-      #Abundance in each cohort----
-      
-      for (a in 2:(maxAge.)) {
+
         # Introduce fishing as Va*F
         
-        N_at[t, a] = exp(-Mseasonal - Va[a - 1] * F*open[m]) * N_at[(t - 1), (a - 1)]
         
-        # Additional calculation for group maxAge
-        plusGroup = N_at[t, maxAge] + exp(-Mseasonal - Va[maxAge] * F*open[m]) * N_at[(t - 1), (maxAge)]
+        month_N_at[1, ] = exp(-Mseasonal - Va * F*open[1]) * N_at[(t - 1), ]
         
-        N_at[t, maxAge] = plusGroup
+    
         
-        #Catch by cohort = number of individual age a in year t - indvid. age a captured in year t----
+        month_N_at[m, ] = exp(-Mseasonal - Va * F*open[m]) * month_N_at[(m - 1), ]
         
-        Catch[t, a] = (((Va[a] * F*open[m]) / (Va[a] * F*open[m] + Mseasonal)) * N_at[(t), (a)] * (1 - exp(-Mseasonal - Va[a] * F*open[m])))*(Weight[a]/1000)
+
         
-        Catch[t, 1] = 0
+        Catch.monthly[m, ] = (((Va * F*open[m]) / (Va * F*open[m] + Mseasonal)) * month_N_at[m, ] * (1 - exp(-Mseasonal - Va * F*open[m])))*(Weight/1000)
         
-      }
-      
+        
+        Catch.monthly[1, ] = 0
+        
     }
+    
     #store results----
+ # Annual abundance
+    
+    N_at[t, 2:maxAge. ] = month_N_at[12, 1:maxAge. -1 ] 
+    
+    plusGroup = month_N_at[12, maxAge] + month_N_at[12, maxAge - 1]
+        
+    N_at[t, maxAge] = plusGroup
+  
+ # Annual catch       
+    Catch[t, ] = colSums(Catch.monthly)
     
     CatchTotal[t] = sum(Catch[t, 1:maxAge])
     
        
     # Calculate Egg production for time t----  
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
     
-    #Calculate Revenue by commercial class
+    #Calculate Revenue by commercial class ------
     
     Revenue[t, 1] = sum(Catch[t, 1:2] * Price[1] )
     
@@ -309,11 +329,13 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
     
     Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
     
-    Profit[t] = RevenueTotal[t] - c*F
+    Profit[t] = RevenueTotal[t] - c*(F)*sum(open)
     
   }
   
-  Months.closed = x$months
+
+  
+  Months.closed = x$months[1]
   
   Out = cbind(Months.closed, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
   
@@ -326,24 +348,59 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
 
 ```{r NPV}
 
-NPV_effort = Model.full %>%
-            group_by(F.Mortality) %>%
-            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year)))
 
-ggplot(NPV_effort, aes(F.Mortality, NPV )) +
-  geom_point() +
-  theme_minimal()
+
+NPV_seasonal = Model.full %>%
+            group_by(Months.closed) %>%
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.05, year))) %>%
+            mutate(Months.closed  = as.numeric(as.character(Months.closed)))
+
+#pdf("./plots/NPV_seasonal.pdf")
+
+p = ggplot(NPV_seasonal, aes(Months.closed,  NPV )) +
+  scale_x_continuous(breaks = c(seq(1,11,1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+  labs(x = "number of months closed annually to fishing") 
+
+
+MyTheme(p)
+
+#dev.off()
 ```
 
 ```{r}
-F_opt = NPV_effort$F.Mortality[which.max(NPV_effort$NPV)]
+seasonal_opt = NPV_seasonal$Months.closed[which.max(NPV_seasonal$NPV)]
 
 Model.full %>%
-  filter(F.Mortality == F_opt) %>%
-  mutate(PV = PresentValue(Profit, discount = 0.05, year)) %>%
-  ggplot(aes(x= year, y = PV)) + 
+  filter(Months.closed == seasonal_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x = year, y = PV)) + 
   geom_point() + 
   theme_minimal() + 
   labs(y = "Discount Profit from Corvina Reina fishery")
 ```
 
+
+```{r}
+p =Model.full %>%
+  #filter(Months.closed == seasonal_opt) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  ggplot(aes(x = year, y = PV, , group = Months.closed)) + 
+  geom_line(aes(color = Months.closed)) + 
+  theme_minimal() + 
+  labs(y = "Discount Profit from Corvina Reina fishery")
+
+plotly::ggplotly(p)
+```
+
+```{r write_out_data}
+
+write.csv(Model.full, "./data/Model_Output/Out_Season.csv")
+
+
+write.csv(NPV_seasonal, "./data/Model_Output/NPV_Season.csv")
+
+
+
+```
