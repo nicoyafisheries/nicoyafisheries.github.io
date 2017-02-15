@@ -35,6 +35,8 @@ library(tidyverse)
 
 sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 
+IC <- read.csv('IC.csv')
+
 #Set Model----
 NumYears = 25
 
@@ -173,7 +175,10 @@ for (j in 1:NumYears){
 
 
 
-InitialCondition <- c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
+
+
+InitialCondition <- IC[1,]
+  #c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
 ```
 
   
@@ -333,7 +338,7 @@ Model.full = plyr::ddply(Z, 'YearsClosed', function(x) {
   
   
   # Calculate Egg production for time t----
-  Eggs[t] = sum(N_at[t,] * fa * Ma)
+  Eggs[t] = sum(N_at[t,] * fa * Ma * females)
   
   #Calculate Revenue by commercial class-----
   
