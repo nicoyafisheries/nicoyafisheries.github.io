@@ -51,8 +51,13 @@ S95 = 32
 M <- K * 1.5
 
 F = 0.579336 - M
+
 #Steepness parameter h - when you dont have a study use 0.7
 h=0.7
+
+
+#Proportion of Stock that is female
+females = 0.6
 ```
 
 
@@ -111,7 +116,7 @@ for (a in 2:(maxAge)){
 }
 
 
-  Eggs[1] = sum(N_at[1, ] * fa * Ma)
+  Eggs[1] = sum(N_at[1, ] * fa * Ma * females)
   
   phi <- Eggs[1]
   
@@ -142,7 +147,7 @@ for (a in 2:(maxAge)){
     
     #Eggs produced at end of Year
     
-    Eggs[t] = sum(N_at[t, ] * fa * Ma)
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
     
   }
 
@@ -153,9 +158,15 @@ for (a in 2:(maxAge)){
 
 IC_2012 = N_at[NumYears, ]
 ```
+
+### To re run for 2014:
+run this chunk then rerun the model
+
 ```{r rest_2014}
+
+
 #Set Model----
-NumYears = (2012-1970)
+NumYears = (2014-1970)
 
 
 
