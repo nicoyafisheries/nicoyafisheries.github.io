@@ -244,7 +244,7 @@ Model.full = plyr::ddply(Scenarios, 'months', function(x) {
   #Eggs produced in year 1
   Eggs[1] = sum(N_at[1, ] * fa. * Ma. * females)
   
-  phi <- sum(unfished * fa. * Ma.)
+  phi <- sum(unfished * fa. * Ma. * females)
   
 
   Catch[1,] = (((Va * F2012) / (Va * F2012 + M)) * N_at[1, ] * (1 - exp(-M - Va * F2012)))*(Weight/1000)
