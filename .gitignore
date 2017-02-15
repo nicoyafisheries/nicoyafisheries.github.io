@@ -3,3 +3,5 @@
 .RData
 .Ruserdata
 ~$Survey_DB.xlsx
+CatchCurve2012.Rmd
+NPV_closure.pdf
