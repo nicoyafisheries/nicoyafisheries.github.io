@@ -154,6 +154,8 @@ YearsClosed = vector(length = NumYears)
 Lc = c(32)
 
 
+# Scenarios of instantaneous mortality (Z)
+
 Z = data.frame(matrix(data = NA, ncol = NumYears + 1, nrow = NumYears)) %>%
   rename( YearsClosed = X1)
 

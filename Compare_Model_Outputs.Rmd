@@ -30,6 +30,8 @@ seasonal =  read_csv("./data/Model_Output/Out_Season.csv")
 
 closure = read_csv("./data/Model_Output/Out_closure.csv")
 
+combined = read_csv("./data/Model_Output/Out_Combined.csv")
+
 #NPV
 
 NPV_effort = read.csv( "./data/Model_Output/NPV_Effort.csv") %>%
@@ -47,6 +49,9 @@ NPV_seasonal = read.csv( "./data/Model_Output/NPV_Season.csv") %>%
 NPV_closure = read.csv( "./data/Model_Output/NPV_closure.csv") %>%
   mutate(Type = "closure") %>%
   rename(Value = YearsClosed)
+
+NPV_combined = read.csv( "./data/Model_Output/NPV_Combined.csv") %>%
+  mutate(Type = "combined") 
   
 NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1], NPV_closure[,-1])
 
@@ -68,7 +73,9 @@ MyTheme(p)
 ```
 
 
-```{r opt}
+```{r opt_PV}
+
+
 
 
 seasonal_opt = seasonal %>%
@@ -91,14 +98,41 @@ closure_opt = closure %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   mutate(Type = "Longterm Closure")
 
-PV_plot = rbind(seasonal_opt[, c(4, 27, 28)], 
-                selectivity_opt[, c(4, 27, 28)], 
-                effort_opt[, c(4, 27, 28)],
-                closure_opt[, c(3, 26, 27)])
+combined_opt = combined %>%
+  filter(Months.closed == NPV_combined$Months.closed[which.max(NPV_combined$NPV)], 
+         Selectivity == NPV_combined$Selectivity[which.max(NPV_combined$NPV)], 
+         F.Mortality == NPV_combined$F.Mortality[which.max(NPV_combined$NPV)]) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  mutate(Type = "Combined")
 
+
+PV_plot = rbind(seasonal_opt[, c(4, 26,27, 28)], 
+                selectivity_opt[, c(4,26, 27, 28)], 
+                effort_opt[, c(4, 26, 27, 28)],
+                closure_opt[, c(3, 25, 26, 27)],
+                combined_opt[, c(6,28:30)])
 #pdf("./plots/compare_opt.pdf")                    
 
 p = ggplot(PV_plot, aes( year, PV, group = Type)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type)) +
+  scale_y_continuous(breaks = c(seq(-100,2000,300))) +
+  labs(x = "Time (years)", y = "Discounted profits (USD)", color = "Management \nIntervention") +
+  theme_minimal()
+
+MyTheme(p)  
+
+#dev.off()
+```
+
+
+
+```{r opt_Real}
+
+
+#pdf("./plots/compare_opt.pdf")                    
+
+p = ggplot(PV_plot, aes( year, Profit, group = Type)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
   geom_line(aes(color = Type)) +
   scale_y_continuous(breaks = c(seq(-100,2000,300))) +
