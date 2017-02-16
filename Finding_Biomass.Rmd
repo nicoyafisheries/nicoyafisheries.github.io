@@ -1,0 +1,173 @@
+---
+title: "Untitled"
+author: "ignacia-rivera"
+date: "February 15, 2017"
+output: html_document
+---
+
+
+```{r setup}
+#rm(list=ls())
+
+library(colorRamps)
+library(tidyverse)
+
+#Set Model----
+NumYears = (2012-1970)
+
+```
+
+
+```{r Parameters}
+Linf = 122.1
+K = 0.172
+to = 0.919
+  
+Wa = 0.024
+  
+Wb = 2.824
+  
+maxAge = 18
+
+#Length (cm) at which a fish is 50/95 percent likely to be mature
+m50 = 55
+
+m95 = 62.7
+
+
+
+S50 = 29
+
+S95 = 32
+
+#Natural mortality
+M <- K * 1.5
+
+F = 0.579336 - M
+
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
+
+
+#Proportion of Stock that is female
+females = 0.6
+```
+
+
+
+```{r Data}
+#Morphology ----
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf*(1-exp(-K*((Age + 0.5)-to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+#Selectivity
+Va = 1/(1 + exp(-log(19)*((Length - S50)/(S95 - S50))))
+
+#Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+
+
+```
+
+
+```{r}
+  
+
+  
+Age_St <- function (R0){
+  
+  # Stores abundance in each age cohort
+
+N_at <- data.frame(matrix(data = NA, ncol = max(Age), nrow = NumYears))  
+  colnames(N_at) = as.character(c(Age))
+
+# Stores number of total eggs produced in each year   
+Eggs <- vector(length = NumYears)
+  
+  N_at[1,1] = R0
+  
+  #  Set inital condition in year t = 0 (assumes no fishing)
+for (a in 2:(maxAge)){
+ 
+  N_at[1,a] = N_at[1,(a-1)]*exp(-M)
+  
+}
+
+
+  Eggs[1] = sum(N_at[1, ] * fa * Ma * females)
+  
+  phi <- Eggs[1]
+  
+  
+  for (t in 2:NumYears) {
+    
+    
+    #Beverton-Holt spawner recruit relationship-----
+    
+    N_at[t, 1] = (0.8 * R0 * h * Eggs[t - 1]) / (0.2 * phi * (1 - h) + (h - 0.2) * Eggs[t - 1])
+                                                                             
+    
+    
+    #Abundance in each cohort----
+    
+    for (a in 2:(maxAge)) {
+      # Introduce fishing as Va*F
+      
+      N_at[t, a] = exp(-M - Va[a - 1] * F) * N_at[(t - 1), (a - 1)]
+      
+      # Additional calculation for group maxAge
+      plusGroup = N_at[t, maxAge] + exp(-M - Va[maxAge] * F) * N_at[(t - 1), (maxAge)]
+      
+      N_at[t, maxAge] = plusGroup
+      
+      
+    }
+    
+    #Eggs produced at end of Year
+    
+    Eggs[t] = sum(N_at[t, ] * fa * Ma * females)
+    
+  }
+
+  
+   catch.final = sum((((Va * F) / (Va * F + M)) * N_at[NumYears,] * (1 - exp(-M - Va * F))) * (Weight / 1000))
+   
+   return(catch.final)
+   
+}
+
+```
+
+```{r}
+
+#Catch estimation is 135,785.41 Kg (Corvina Reina para el 2012, zona 1).
+
+Estimated_Catch <- 135785.41
+Initial_Biomass <- seq(354800, 355900, 10)
+Catch <- c(rep(NA, length (Initial_Biomass)))
+
+for (i in Initial_Biomass){
+ 
+  
+  Catch[which(Initial_Biomass == i)] =  Age_St(i)
+  
+}
+
+Difference <- abs(Catch - Estimated_Catch)
+Estimted_Initial_R0 <- Initial_Biomass[which(Difference == min(Difference))]
+
+plot(Initial_Biomass, Catch)
+
+```
+
