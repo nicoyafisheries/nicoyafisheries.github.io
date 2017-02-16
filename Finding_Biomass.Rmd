@@ -81,15 +81,8 @@ fa <- Weight*41
 ```
 
 
-```{r Data Structures}
-
-
-
-
-```
-  
-
 ```{r}
+  
 
   
 Age_St <- function (R0){
