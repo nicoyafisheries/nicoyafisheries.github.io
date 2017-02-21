@@ -51,7 +51,14 @@ lengths = data.frame(Year = c(all.gear.2012$Year,
                         Geartype = "all"
 )
 
-save(lengths, file = "lengths.RData")
+test = lengths %>%
+filter(Year == 2012, Length ==55)
+
+
+test = all.gear.2012 %>%
+  filter( length_class == 55)
+
+save(lengths, file = "../lengths.RData")
 
 
 ```
