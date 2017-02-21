@@ -37,7 +37,7 @@ corvina_reina <- structure(list(
   class = "data.frame",
   row.names = 1:55)
 
-############################################################################################
+################################################################################################################################################################
 #Part 1.
 # install.packages("devtools")
 devtools::install_github("datalimited/datalimited")
@@ -54,7 +54,7 @@ plot(corvina_reina$yr, corvina_reina$ct, type = "o", xlab = "Year",
 plot(corvina_reina$yr,  apply(x$biomass, 2, median)[-1], type = "o",
      ylab = "Estimated biomass", xlab = "Year")
 hist(x$bmsy)
-plot(x$theta$r, x$theta$k, col = "#00000030")
+plot(x$theta$r,x$theta$k , col = "#00000030")
 
 #plot(x$theta$r, x$theta$k, col = "#00000030")
 
@@ -66,5 +66,5 @@ ggplot(x$bbmsy, aes(year, bbmsy_q50)) + geom_line()  +
   geom_ribbon(aes(ymin = bbmsy_q2.5, ymax = bbmsy_q97.5), alpha = 0.1) +
   geom_hline(yintercept = 1, lty = 2) + theme_light()
 
-##############################################################################################################################################
+################################################################################################################################################################
 
