@@ -44,7 +44,28 @@ ui <- fluidPage(
                   "Long-term Closure (years)",
                   min = 0,
                   max = 19,
-                  value = 0)
+                  value = 0),
+      
+      
+      selectInput(inputId = "y", 
+                  label = "Y-axis:",
+                  choices = c("Profit" = "Profit", 
+                              "Biomass" = "Biomass", 
+                              "Catch" = "CatchTotal", 
+                              "Revenue" = "RevenueTotal", 
+                              "Year" = "year"), 
+                  selected = "Profit"),
+      
+      # Select variable for x-axis --------------------------------------------
+      selectInput(inputId = "x", 
+                  label = "X-axis:",
+                  choices = c("Profit" = "Profit", 
+                              "Biomass" = "Biomass", 
+                              "Catch" = "CatchTotal", 
+                              "Revenue" = "RevenueTotal", 
+                              "Year" = "year"), 
+                  selected = "year")
+      
     ),
     
     # Show a plot of the generated distribution
@@ -52,7 +73,7 @@ ui <- fluidPage(
       textOutput(outputId = "NPV"),
       HTML("<br>"),
       
-      wellPanel(plotOutput("NPVplot")),
+      wellPanel(plotOutput("Profitplot")),
       
       # Show data table -------------------------------------------------------
       wellPanel(DT::dataTableOutput(outputId = "Outtable"))
@@ -103,11 +124,11 @@ server <- function(input, output, session) {
   
   #Plot of selected spp-----
     
-    output$NPVplot <- renderPlot({
+    output$Profitplot <- renderPlot({
       # generate bins based on input$bins from ui.R
       
-      
-      ggplot(Model.full(), aes( year, (Profit/1000))) +
+      ggplot(Model.full(),aes_string(x = input$x, y = input$y)) +
+      #ggplot(Model.full(), aes( year, (Profit/1000))) +
         geom_hline(yintercept = 0, lty = 2) +
         geom_line( size =1 ) +
         #scale_y_continuous(breaks = c(seq(-100,4000,600))) +
