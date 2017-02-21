@@ -1,0 +1,151 @@
+---
+author: "Alex Smith"
+date: "2/16/2017"
+output: html_document
+---
+
+
+```{r setup}
+rm(list=ls())
+
+library(colorRamps)
+library(tidyverse)
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+IC <- read.csv('IC.csv')
+
+#Set Model----
+NumYears = 25
+
+R0 = 1000
+
+Z.2012 = 0.579336
+
+```
+
+
+```{r Parameters}
+Linf = 122.1
+K = 0.172
+to = 0.919
+  
+Wa = 0.024
+  
+Wb = 2.824
+  
+maxAge = 18
+
+#Length (cm) at which a fish is 50/95 percent likely to be mature
+m50 = 55
+
+m95 = 62.7
+
+females = 0.6
+
+#Natural mortality
+M <- K * 1.5
+
+
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
+```
+
+
+
+```{r Data}
+#Morphology ----
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf*(1-exp(-K*((Age + 0.5)-to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+# Probabilty of Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+
+#Price per USD per kg is dependent on size of fish
+Price <- c(0.71,3.25,4.31)
+
+N0 = as.numeric(IC[1,])
+
+```
+
+```{r scenarios}
+Lc = c(29, 31, 38, 45, 62, 70, 76, 101)
+
+Z = seq((M + 0.025) , 0.8, 0.025)
+
+months.open = c(1:12)
+
+Scenarios = expand.grid(Lc, Z, months.open) %>%
+            select(Z = Var2, Lc = Var1, months.open = Var3) %>%
+            mutate(Label = paste( months.open, Z, Lc, sep = "-"))
+```
+
+
+```{r}
+#gear selectivity
+#Length (cm) at which a fish is vulnerable to fishing mortality----
+
+Lc = 32
+  Va = ifelse(Length < Lc, 0, 1)
+
+#months open to fishing
+
+u = 12
+
+#fishing mortality
+
+F = Z.2012 - M 
+
+#survival probabilty
+
+Sa <- exp(-M - (u * Va * (F/12)))
+
+# fecundity
+
+fecundity <- 0.00003242313 * fa * Ma * females 
+  
+  #(560 * fa * Ma * females) / (17271619 + ((h - 0.2) * fa * Ma * females))
+```
+
+
+```{r}
+
+A = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+
+A[1, ] <- fecundity
+
+
+for (r in 2:18){
+  
+  j = r - 1 
+  
+  A[r, j] =  Sa[j]
+
+  
+}
+
+A[maxAge, maxAge] = Sa[maxAge]
+
+```
+
+
+
+```{r}
+pop <- popbio::pop.projection(A, N0, iterations = 25)
+
+N <- pop$stage.vectors 
+
+popbio::stage.vector.plot(pop$stage.vector)
+```
+
