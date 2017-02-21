@@ -198,7 +198,7 @@ Model_fun = function(x) {
   
   for (t in 2:NumYears) {
     
-    F = ifelse(t <= recovery, 0, Fconditional)
+    F = ifelse((t -1) <= recovery, 0, Fconditional)
     
     
     year[t] = t - 1 
