@@ -33,16 +33,16 @@ rm(list=ls())
 library(colorRamps)
 library(tidyverse)
 
-sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+sapply(list.files(pattern ="[.]R$", path = "./Functions", full.names = TRUE), source)
 
 IC <- read.csv('IC.csv')
 
 #Set Model----
-NumYears = 25
+NumYears = 20
 
-R0 = 1000
+R0 = 355770 
 
-Z.2012 = 0.579336
+Z.2012 = 0.576057
 
 ```
 
@@ -153,7 +153,8 @@ F.Mortality = vector(length = NumYears)
 #Length at first capture
 Lc = c(32)
 
-Z = seq(M , 0.8, 0.025)
+Z = Z.2012 
+  #c(Z.2012, seq(M , 0.7, 0.001))
 
 Scenarios = expand.grid(Lc, Z) %>%
             mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
@@ -372,8 +373,11 @@ NPV_effort = Model.full %>%
 p = ggplot(NPV_effort, aes(F.Mortality, NPV )) +
       geom_point(size = 3) +
       scale_x_continuous(breaks = c(seq(0,1,0.1))) +
-      scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
+      #scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
       geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+      geom_vline(xintercept = (Z.2012-M), alpha =0.5, lty =2) +
+        geom_vline(xintercept = (Z.2012-M)*0.5, alpha =0.5, lty =2) +
+      geom_vline(xintercept = 0.134, alpha =0.5, lty =2) + 
       labs(x = "Effort")
   
 MyTheme(p)  
