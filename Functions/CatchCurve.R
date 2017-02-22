@@ -31,10 +31,10 @@ CatchCurve <- function(LengthData, LH) {
   to <- LH$to
   
   # Assign Length data
-  Lengths <- LengthData
+  Lengths <-LengthData
   
   #Convert length to age
-  Ages <- to - (1 / K) * log(1 - Lengths / Linf)
+  Ages <- to - (1 / K) * log(1 - Lengths / Linf) #to + log( 1 - Lengths / Linf) / (-K) #
   
   # Use mode to set age at which a fish is fully vulnerable
   

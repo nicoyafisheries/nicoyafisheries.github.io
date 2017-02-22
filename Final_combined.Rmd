@@ -38,11 +38,11 @@ sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 IC <- read.csv('IC.csv')
 
 #Set Model----
-NumYears = 25
+NumYears = 20
 
-R0 = 1000
+R0 = 355770 
 
-Z.2012 = 0.579336
+Z.2012 = 0.576057
 
 ```
 
@@ -162,9 +162,9 @@ Selectivity = vector(length = NumYears)
 
 Lc = c(29, 31, 38, 45, 62, 70, 76, 101)
 
-Z = seq((M + 0.025) , 0.8, 0.025)
+Z = seq((M + 0.025) , 0.8, 0.02)
 
-months.open = c(1:12)
+months.open = c(3:12)
 
 Scenarios = expand.grid(Lc, Z, months.open) %>%
             select(Z = Var2, Lc = Var1, months.open = Var3) %>%

@@ -190,9 +190,9 @@ InitialCondition <- IC[1,]
 Model.fun = function(x) {
   Z = x[1]
   
-  Lc = x[2]
+  Lc = 32
   
-  months.open = x[3]
+  months.open = 12
   
   R0. = R0
   maxAge. = maxAge
@@ -359,7 +359,7 @@ Model.fun = function(x) {
 
 ```{r NPV}
 
-optim(0.4, Model.fun, method = "L-BFGS-B", lower = 0.258, upper = 0.8, control = list(maxit = 50000, fnscale = -1, factr = 0.003))
+optim(0.4, Model.fun, method = "L-BFGS-B", lower = 0.258, upper = 0.8, control = list(maxit = 500, fnscale = -1, factr = 0.003, trace=6))
 
 ```
 

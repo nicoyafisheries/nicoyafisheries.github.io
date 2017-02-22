@@ -1,11 +1,12 @@
 
-Model_fun = function(x) {
-  Z = x[[1]]
-  
-  Lc = x[[2]]
-  
-  months.open = x[[3]]
-  
+Model_fun = function(Z,Lc,months.open) {
+  # Z = x[[1]]
+  # Z = x$Z
+  # 
+  # Lc = x$Lc #[[2]]
+  # 
+  # months.open = x$months.open #x[[3]]
+
   R0. = R0
   maxAge. = maxAge
   h. = h
@@ -161,9 +162,9 @@ Model_fun = function(x) {
   Out = cbind(Months.closed, F.Mortality, Selectivity, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
   
   
-  NPV = (sum(PresentValue(Profit, discount = 0.09, year)))
+  #NPV = (sum(PresentValue(Profit, discount = 0.09, year)))
   
-  final = list(Out, NPV)
+  #final = list(Out, NPV)
   
-  return(final)
+  return(Out)
 }

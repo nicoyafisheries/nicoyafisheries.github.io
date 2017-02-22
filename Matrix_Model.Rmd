@@ -113,9 +113,9 @@ Sa <- exp(-M - (u * Va * (F/12)))
 
 # fecundity
 
-fecundity <- 0.00003242313 * fa * Ma * females 
+fecundity <- #0.00003242313 * fa * Ma * females 
   
-  #(560 * fa * Ma * females) / (17271619 + ((h - 0.2) * fa * Ma * females))
+  (560 * fa * Ma * females) / (17271619 + ((h - 0.2) * fa * Ma * females))
 ```
 
 
