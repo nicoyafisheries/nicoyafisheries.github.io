@@ -38,9 +38,9 @@ sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 IC <- read.csv('IC.csv')
 
 #Set Model----
-NumYears = 25
+NumYears = 20
 
-R0 = 1000
+R0 = 355770
 
 Z.2012 = 0.579336
 

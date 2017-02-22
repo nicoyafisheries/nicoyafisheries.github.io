@@ -32,6 +32,7 @@ ui <- fluidPage(
       numericInput(inputId = "F.mort", 
                    label = "Effort", 
                    min = 0.258, max = 1, 
+                   step = 0.001,
                    value = 0.5706),
       
       sliderInput("months.open",

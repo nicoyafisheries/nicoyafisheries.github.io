@@ -18,9 +18,10 @@ library(colorRamps)
 library(tidyverse)
 
 #Set Model----
-NumYears = (2012-1970)
+NumYears = 60 #(2012 - 1970)
 
-R0 = 1000
+R0 = 355770 
+  #1000
 
 ```
 
@@ -113,6 +114,10 @@ for (a in 2:(maxAge)){
  
   N_at[1,a] = N_at[1,(a-1)]*exp(-M)
   
+  
+  plusGroup1 = N_at[1, maxAge] + exp(-M ) * N_at[1, (maxAge)]
+      
+      N_at[1, maxAge] = plusGroup1
 }
 
 
