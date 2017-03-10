@@ -9,6 +9,9 @@
 
 library(shiny)
 library(tidyverse)
+library(tools)
+library(stringr)
+
 
 source("../www/Model_Fun.R")
 source("../www/PresentValue.R")
@@ -18,11 +21,17 @@ source("../www/Mode.R")
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Deterministic Age Structured Model"),
+  titlePanel("Deterministic Age Structured Bio-economic Model"),
   
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
     sidebarPanel(
+      numericInput(inputId = "NumYears", 
+                   label = "Years (total)", 
+                   min = 2, max = 100, 
+                   step = 1,
+                   value = 20),
+      
       sliderInput("Lc",
                   "Length at first capture:",
                   min = 1,
@@ -47,25 +56,34 @@ ui <- fluidPage(
                   max = 19,
                   value = 0),
       
+      numericInput(inputId = "delta", 
+                   label = "Discount Rate", 
+                   min = 0, max = 1, 
+                   step = 0.005,
+                   value = 0.09),
       
       selectInput(inputId = "y", 
                   label = "Y-axis:",
-                  choices = c("Profit" = "Profit", 
-                              "Biomass" = "Biomass", 
-                              "Catch" = "CatchTotal", 
-                              "Revenue" = "RevenueTotal", 
+                  choices = c("Profit (2012 USD)" = "Profit", 
+                              "Biomass (Kg)" = "Biomass", 
+                              "Catch (Kg)" = "CatchTotal", 
+                              "Revenue (2012 USD)" = "RevenueTotal", 
                               "Year" = "year"), 
                   selected = "Profit"),
       
       # Select variable for x-axis --------------------------------------------
       selectInput(inputId = "x", 
                   label = "X-axis:",
-                  choices = c("Profit" = "Profit", 
-                              "Biomass" = "Biomass", 
-                              "Catch" = "CatchTotal", 
-                              "Revenue" = "RevenueTotal", 
+                  choices = c("Profit (2012 USD)" = "Profit", 
+                              "Biomass (Kg)" = "Biomass", 
+                              "Catch (Kg)" = "CatchTotal", 
+                              "Revenue (2012 USD)" = "RevenueTotal", 
                               "Year" = "year"), 
-                  selected = "year")
+                  selected = "year"),
+      
+      actionButton(inputId = "recalc", 
+                   label = "Calculate")
+    
       
     ),
     
@@ -87,14 +105,22 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   
   
+  Model.full <- eventReactive(eventExpr = input$recalc,
+                                 valueExpr = {
+                                   
+                                   Model_fun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
+                                 
+                                   },
+                                 ignoreNULL = FALSE
+  )
   
   
   
-  Model.full <- reactive({
-    
-    Model_fun(c(input$F.mort, input$Lc, input$months.open, input$recovery))
-    
-  })
+  # Model.full <- reactive({
+  #   
+  #   Model_fun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
+  #   
+  # })
   
   tableDATA  = reactive({ 
     
@@ -109,7 +135,7 @@ server <- function(input, output, session) {
   
   NPV = reactive({ 
     Model.full() %>%
-    summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
+    summarise(NPV = sum(PresentValue(Profit, discount = input$delta, year)))
 
   })
   
@@ -120,7 +146,8 @@ server <- function(input, output, session) {
                   options = list(pageLength = 10), 
                   rownames = FALSE) %>%
      DT::formatRound(columns=c( 'F',  "Catch", "Revenue", "Biomass", "Profit"), digits=3)
-  })
+  
+    })
   
   
   #Plot of selected spp-----
@@ -134,7 +161,9 @@ server <- function(input, output, session) {
         geom_line( size =1 ) +
         #scale_y_continuous(breaks = c(seq(-100,4000,600))) +
         scale_x_continuous(breaks = c(seq(0,20, 2))) +
-        labs(x = "Time (years)", y = "Real Profits (thousand USD)") +
+        labs(x = toTitleCase(str_replace_all(input$x, "_", " ")),
+             y = toTitleCase(str_replace_all(input$y, "_", " "))) +
+        #labs(x = "Time (years)", y = "Real Profits") +
         theme_minimal()
       
       
