@@ -37,12 +37,14 @@ sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 
 IC <- read.csv('IC.csv')
 
-#Set Model----
-NumYears = 25
+# Set Model----
+NumYears = 20
 
-R0 = 1000
-
-Z.2012 = 0.576057
+# Estimated virgin abundance of 1 yr olds    
+  R0 = 355770 
+  
+# Estimated instananeous mortality in 2012 Zone 201  
+  Z.2012 = 0.576057
 
 ```
 
@@ -154,6 +156,9 @@ Selectivity = vector(length = NumYears)
 
 ```
   
+### Effort  
+  
+  
 ```{r effort_scenario}
 
 #Scenario control-----
@@ -164,7 +169,7 @@ Z = c(Z.2012, seq(M , 0.7, 0.001))
 Scenarios.effort = expand.grid(Lc, Z) %>%
                     mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
                     select(Label , Z = Var2, Lc = Var1) %>%
-                    mutate(months.open = 12)
+                    mutate(months.open = 12, closure = 0)
 
 
 
@@ -174,18 +179,147 @@ InitialCondition <- IC[1,]
 ```
 
 
+
 ```{r}
 
-Effort = plyr::ddply(Scenarios.effort, 'Label', map_df(.f =Model_fun(Z,Lc,months.open)))
 
-Effort = plyr::ddply(Scenarios.effort, 'Label', function(x){
-  return(Model_fun(x$Z, x$Lc, x$months.open))
-})
+Effort = plyr::ddply(Scenarios.effort, 'Label', function(x) {
+  
+  return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
 
+  })
 
-
-
-Model_fun(Scenarios.effort.test$Z, Scenarios.effort.test$Lc, Scenarios.effort.test$months.open)
 
 ```
 
+
+```{r write_effort}
+write.csv(Effort, "./data/Model_Output/Out_Effort.csv")
+```
+
+
+### Selectivity 
+
+```{r selectivity_scenario}
+
+#Scenario control-----
+
+#Length at first capture
+Lc = trunc(Length) #seq(15,122, 1)  #c(29, 31, 30, 38, 45, 62, 70, 76, 101)
+
+Z = Z.2012
+
+Scenarios.selectivity = expand.grid(Lc, Z) %>%
+            mutate(Label = as.vector(outer(Lc, Z, paste, sep = "-"))) %>%
+            select(Label , Z = Var2, Lc = Var1) %>%
+            mutate(months.open = 12, closure = 0)
+
+InitialCondition <- IC[1,]
+```
+
+
+
+```{r}
+
+
+Selectivity = plyr::ddply(Scenarios.selectivity, 'Label', function(x) {
+  
+  return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
+
+  })
+
+NPV_selectivity = selectivity %>%
+            group_by(Selectivity) %>%
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year)))
+
+```
+
+
+```{r write_select}
+write.csv(Selectivity, "./data/Model_Output/Out_Selectivity.csv")
+```
+
+
+
+### Seasonal
+
+
+```{r set_scenario}
+
+#Scenario control-----
+
+#Length at first capture
+Lc = 32
+
+Z = Z.2012
+
+months.open = seq(1,12,1)
+
+Scenarios.seasonal = expand.grid(Lc, Z, months.open) %>%
+                        select(Z = Var2, Lc = Var1, months.open = Var3) %>%
+                        mutate(Label = paste(months.open, Z, Lc, sep = "-")) %>%
+                        mutate( closure = 0)
+
+
+
+InitialCondition <- IC[1,]
+  #c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
+```
+
+
+```{r run_seasonal}
+
+
+Seasonal = plyr::ddply(Scenarios.seasonal, 'Label', function(x) {
+  
+  return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
+
+  })
+
+
+```
+
+
+
+```{r write_season}
+write.csv(Seasonal, "./data/Model_Output/Out_Seasonal.csv")
+```
+
+
+### Combined
+
+
+```{r combined_scenario}
+
+#Scenario control-----
+
+#Length at first capture
+
+Lc = trunc(Length)
+
+Z = c(Z.2012, seq((M + 0.025) , 0.8, 0.002) )
+
+months.open = c(3:12)
+
+Scenarios.combined = expand.grid(Lc, Z, months.open) %>%
+            select(Z = Var2, Lc = Var1, months.open = Var3) %>%
+            mutate(Label = paste( months.open, Z, Lc, sep = "-")) %>%
+            mutate( closure = 0)
+            
+
+
+InitialCondition <- IC[1,]
+  #c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
+```
+
+```{r run_combined}
+
+
+Combined = plyr::ddply(Scenarios.combined, 'Label', function(x) {
+  
+  return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
+
+  })
+
+
+```

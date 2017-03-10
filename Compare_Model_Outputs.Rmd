@@ -26,72 +26,129 @@ effort = read_csv("./data/Model_Output/Out_Effort.csv")
 
 selectivity =  read_csv("./data/Model_Output/Out_Selectivity.csv")
 
-seasonal =  read_csv("./data/Model_Output/Out_Season.csv")
+seasonal =  read_csv("./data/Model_Output/Out_Seasonal.csv")
 
 closure = read_csv("./data/Model_Output/Out_closure.csv")
 
-#combined = read_csv("./data/Model_Output/Out_Combined.csv")
+combined1 = read_csv("./data/Model_Output/Out_Combined_1.csv")
+
+combined2 = read_csv("./data/Model_Output/Out_Combined2_2.csv")
+
+combined3 = read_csv("./data/Model_Output/Out_Combined2_3.csv")
+
+combined = rbind(combined1, combined2, combined3)
 
 #NPV
 
-NPV_effort = read.csv( "./data/Model_Output/NPV_Effort.csv") %>%
+NPV_effort = read.csv( "./data/Model_Output/NPV_Effort2.csv") %>%
   mutate(Type = "effort") %>%
   rename(Value = F.Mortality)
 
-NPV_selectivity = read.csv( "./data/Model_Output/NPV_Selectivity.csv") %>%
+NPV_selectivity = read.csv( "./data/Model_Output/NPV_Selectivity2.csv") %>%
   mutate(Type = "selectivity") %>%
   rename(Value = Selectivity)
 
-NPV_seasonal = read.csv( "./data/Model_Output/NPV_Season.csv") %>%
-  mutate(Type = "seasonal") %>%
-  rename(Value = Months.closed)
+NPV_seasonal = seasonal %>%
+            group_by(Months.closed) %>%
+            summarise(NPV = sum(PresentValue(Profit, discount = 0.09, year))) %>%
+            mutate(Months.closed  = as.numeric(as.character(Months.closed))) %>%
+            mutate(Type = "seasonal") %>%
+            rename(Value = Months.closed)
+
+  
+  
+  # read.csv( "./data/Model_Output/NPV_Season2.csv") %>%
+#   mutate(Type = "seasonal") %>%
+#   rename(Value = Months.closed)
 
 NPV_closure = read.csv( "./data/Model_Output/NPV_closure.csv") %>%
   mutate(Type = "closure") %>%
   rename(Value = YearsClosed)
 
-# NPV_combined = read.csv( "./data/Model_Output/NPV_Combined.csv") %>%
-#   mutate(Type = "combined") %>%
-#   rename(Value = Label)
+NPV_combined = read.csv( "./data/Model_Output/NPV_Combined3.csv") %>%
+  filter(!is.na(NPV)) %>%
+  mutate(Type = "combined") %>%
+  rename(Value = Label)
   
-NPV_all = rbind(NPV_effort[,-1], NPV_seasonal[, -1], NPV_selectivity[,-1], NPV_closure[,-1])
-
-#, NPV_combined[, c(6,5,7)]
+NPV_all = rbind(NPV_effort[,-1], select(NPV_seasonal, Value, NPV, Type), NPV_selectivity[,-1], NPV_closure[,-1], select(NPV_combined, Value, NPV, Type))
 
 ```
 
 ```{r boxplot}
 
 #pdf("./plots/compare_NPV.pdf") 
-
-p =ggplot(NPV_all, aes(factor(Type), NPV)) +
-    geom_boxplot() +
-    geom_hline(yintercept = 0, alpha = 0.5, lty = 2) +
-    labs(x = "Management Intervention") +
-    scale_y_continuous(breaks = c(seq(-15000,17000,5000)))
-
-MyTheme(p)
+# 
+# p =ggplot(NPV_all, aes(factor(Type), NPV)) +
+#     geom_boxplot() +
+#     geom_hline(yintercept = 0, alpha = 0.5, lty = 2) +
+#     labs(x = "Management Intervention") +
+#     scale_y_continuous(breaks = c(seq(-15000,17000,5000)))
+# 
+# MyTheme(p)
 
 #dev.off()
 ```
 
 
-```{r barplot}
-p = NPV_all %>%
-  group_by(Type) %>%
-  summarise(opt = max(NPV)) %>%
-  
-  ggplot(aes(factor(Type), opt)) +
-    geom_bar( stat = "identity") +
-    geom_hline(yintercept = 0, alpha = 0.5, lty = 2) +
-    labs(x = "Management Intervention") 
-   # scale_y_continuous(breaks = c(seq(-15000,17000,5000)))
+```{r}
+comp_select = NPV_selectivity %>%
+  filter(Value == 56) %>%
+  select(Value, NPV, Type)
 
-MyTheme(p)
+comp_effort = NPV_effort %>%
+  filter(Value == 0.159) %>%
+  select(Value, NPV, Type)
+
+comp_seasonal = NPV_seasonal %>%
+  filter(Value == 4) %>%
+  select(Value, NPV, Type)
+
+comp_combined = NPV_combined %>%
+  filter(Value == "4-0.159-56") %>%
+  select(Value, NPV, Type)
+
+comp_all = rbind(comp_select, comp_effort, comp_seasonal, comp_combined) 
 ```
 
 
-```{r opt_PV}
+```{r barplot}
+
+comp_all = rbind(comp_select, comp_effort, comp_seasonal, comp_combined) %>%
+  mutate(Fill = "compliance") 
+
+opt = NPV_all %>%
+  group_by(Type) %>%
+  summarise(opt = max(NPV)) %>%
+  rename(NPV = opt) %>%
+  mutate(Fill = "optimal")
+
+label.order = c("closure", "seasonal", "effort","selectivity",  "combined")
+
+  #p = rbind(comp_all[,-1], opt) %>% 
+#labels = (c("Compliance", "Optimal")),    
+
+pdf("./plots/compare_NPV.pdf", width = 10, height = 6)
+
+p =  ggplot() +
+    geom_bar( data = opt, aes(factor(Type), (NPV/1000), fill = Fill), stat = "identity", position = "identity") +
+    scale_x_discrete(limits=c(label.order)) +
+    geom_bar( data = comp_all, aes(factor(Type), (NPV/1000), fill = Fill), stat = "identity", position = "identity") +
+    scale_fill_manual( labels = rev(c( "BCS","Compliance")), values = (c("#104E8B", "#00BFFF"))) +
+    scale_x_discrete(limits=c(label.order)) +
+    geom_hline(yintercept = 0, alpha = 0.5, lty = 2) +
+    theme_minimal()+
+    labs(x = "Management Approach", y = "NPV thousand USD", fill = " ") +
+    scale_y_continuous(breaks = c(seq(0,4000,500)), expand=c(0,0)) +
+    guides(fill = guide_legend(reverse=TRUE))
+
+#c("#FFB90F")
+MyTheme(p)
+
+dev.off()
+```
+
+
+```{r opt_paths}
 
 
 
@@ -100,6 +157,7 @@ seasonal_opt = seasonal %>%
   filter(Months.closed == NPV_seasonal$Value[which.max(NPV_seasonal$NPV)]) %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   mutate(Type = "Seasonal Closure")
+
 
 selectivity_opt = selectivity %>%
   filter(Selectivity == NPV_selectivity$Value[which.max(NPV_selectivity$NPV)]) %>%
@@ -116,32 +174,50 @@ closure_opt = closure %>%
   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
   mutate(Type = "Longterm Closure")
 
-# combined_opt = combined %>%
-#   filter(Months.closed == NPV_combined$Months.closed[which.max(NPV_combined$NPV)], 
-#          Selectivity == NPV_combined$Selectivity[which.max(NPV_combined$NPV)], 
-#          F.Mortality == NPV_combined$F.Mortality[which.max(NPV_combined$NPV)]) %>%
-#   mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
-#   mutate(Type = "Combined")
+combined_opt = Model_full(c(0.551,75, 12, 0)) %>%
+  mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  mutate(Type = "Combined") 
+  
+  # combined %>%
+  # filter(Months.closed == NPV_combined$Months.closed[which.max(NPV_combined$NPV)],
+  #        Selectivity == NPV_combined$Selectivity[which.max(NPV_combined$NPV)],
+  #        F.Mortality == NPV_combined$F.Mortality[which.max(NPV_combined$NPV)]) %>%
+  # mutate(PV = PresentValue(Profit, discount = 0.09, year)) %>%
+  # mutate(Type = "Combined") 
 
 
-PV_plot = rbind(seasonal_opt[, c(4, 26,27, 28)], 
-                selectivity_opt[, c(4,26, 27, 28)], 
-                effort_opt[, c(4, 26, 27, 28)],
-                closure_opt[, c(3, 25, 26, 27)])
+PV_plot = rbind(select(seasonal_opt,year, Profit, PV, Biomass, Type), 
+                select(selectivity_opt, year, Profit, PV, Biomass, Type), 
+                select(effort_opt, year, Profit, PV, Biomass, Type),
+                select(closure_opt, year, Profit, PV, Biomass, Type),
+                select(combined_opt, year, Profit, PV, Biomass, Type))
 #,
  #               combined_opt[, c(6,28:30)])
 #pdf("./plots/compare_opt.pdf")                    
+```
 
-p = ggplot(PV_plot, aes( year, PV, group = Type)) +
+```{r opt_Biomass}
+
+
+line.levels = c( "Longterm Closure", "Combined", "Gear Selectivity", "Effort Reduction","Seasonal Closure")
+
+PV_plot$Type2 <- factor(PV_plot$Type, levels = line.levels)               
+
+OurColors = c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )
+
+pdf("./plots/compare_opt_biomass.pdf")
+
+p = ggplot(PV_plot, aes( year+1, Biomass/(1000 * 1000), group = Type2)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
-  geom_line(aes(color = Type), size =1, alpha = 0.7) +
-  #scale_y_continuous(breaks = c(seq(-100,2000,300))) +
-  labs(x = "Time (years)", y = "Discounted profits (USD)", color = "Management \nIntervention") +
+  geom_line(aes(color = Type2), size =1) +
+  scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Biomass (kMT)", color = "Management \nApproach") +
   theme_minimal()
 
 MyTheme(p)  
 
-#dev.off()
+dev.off()
 ```
 
 
@@ -149,18 +225,153 @@ MyTheme(p)
 ```{r opt_Real}
 
 
-#pdf("./plots/compare_opt.pdf")                    
 
-p = ggplot(PV_plot, aes( year, (Profit/1000), group = Type)) +
+
+pdf("./plots/compare_opt.pdf")     
+#pdf("./plots/compare_opt_short.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
-  geom_line(aes(color = Type), size =1 ) +
-  #scale_y_continuous(breaks = c(seq(-100,4000,600))) +
-  scale_x_continuous(breaks = c(seq(0,20, 2))) +
-  labs(x = "Time (years)", y = "Real Profits (thousand USD)", color = "Management \nIntervention") +
-  theme_minimal()
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
 
-MyTheme(p)  
+  
 
-#dev.off()
+
+MyTheme(p1)  
+
+dev.off()
 ```
 
+```{r alpha_closure}
+pdf("./plots/compare_opt_closure.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(1,rep(0.3, 4))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c(OurColors )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
+
+  
+
+
+MyTheme(p1)  
+
+dev.off()
+```
+```{r alpha_season}
+pdf("./plots/compare_opt_season.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(0.3, 4),1)) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c(OurColors )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
+
+  
+
+
+MyTheme(p1)  
+
+dev.off()
+```
+
+```{r alpha_combined}
+pdf("./plots/compare_opt_combined.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(0.3,1,rep(0.3, 3))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c(OurColors )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
+
+  
+
+
+MyTheme(p1)  
+
+dev.off()
+```
+
+```{r alpha_select}
+pdf("./plots/compare_opt_select.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(0.3, 2),1,rep(0.3, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c(OurColors )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
+
+  
+
+
+MyTheme(p1)  
+
+dev.off()
+```
+
+```{r alpha_effort}
+pdf("./plots/compare_opt_effort.pdf")
+
+p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(0.3, 3),1,0.3)) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c(OurColors)) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7))
+
+  
+
+
+MyTheme(p1)  
+
+dev.off()
+```

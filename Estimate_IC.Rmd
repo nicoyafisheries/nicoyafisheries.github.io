@@ -18,7 +18,7 @@ library(colorRamps)
 library(tidyverse)
 
 #Set Model----
-NumYears = 60 #(2012 - 1970)
+NumYears = (2012 - 1970)
 
 R0 = 355770 
   #1000
@@ -51,7 +51,7 @@ S95 = 32
 #Natural mortality
 M <- K * 1.5
 
-F = 0.579336 - M
+F = 0.576057 - M
 
 #Steepness parameter h - when you dont have a study use 0.7
 h=0.7
