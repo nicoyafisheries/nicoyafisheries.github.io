@@ -115,7 +115,7 @@ Sa <- exp(-M - (u * Va * (F/12)))
 
 fecundity <- #0.00003242313 * fa * Ma * females 
   
-  (560 * fa * Ma * females) / (17271619 + ((h - 0.2) * fa * Ma * females))
+(560 * fa * Ma * females) / (17271619 + ((h - 0.2) * fa * Ma * females))
 ```
 
 
@@ -145,6 +145,10 @@ A[maxAge, maxAge] = Sa[maxAge]
 pop <- popbio::pop.projection(A, N0, iterations = 50)
 
 N <- pop$stage.vectors 
+<<<<<<< HEAD
+popbio::stage.vector.plot(pop$stage.vector, log = "y", proportions = FALSE)
+#popbio::stage.vector.plot(pop$stage.vector)
+=======
 
 popbio::stage.vector.plot(pop$stage.vector, log = "y", proportions = FALSE)
 
@@ -233,5 +237,6 @@ myImagePlot(sens)
 myImagePlot(elast)
 
 
+>>>>>>> ad22918ec86ceb793446101c0dadbc081d9e5298
 ```
 
