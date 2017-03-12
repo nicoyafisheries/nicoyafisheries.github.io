@@ -1,0 +1,151 @@
+---
+title: "Matrix Model with Density Dependence and Uncertainty"
+output: html_document
+---
+
+```{r setup}
+rm(list=ls())
+
+library(tidyverse)
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+IC <- read.csv('IC.csv')
+
+#Set Model----
+time_horizon = 100
+
+# Recruits in unfished pop
+R0 = 355770
+
+# Calcualted total instantaneous mortality
+Z.2012 = 0.579336
+
+```
+
+
+```{r Parameters}
+Linf = 122.1
+K = 0.172
+to = 0.919
+  
+Wa = 0.024
+  
+Wb = 2.824
+  
+maxAge = 18
+
+#Length (cm) at which a fish is 50/95 percent likely to be mature
+m50 = 55
+
+m95 = 62.7
+
+females = 0.6
+
+#Natural mortality
+M <- K * 1.5
+
+
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
+```
+
+
+
+```{r Data}
+#Morphology ----
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf * (1 - exp(-K * ((Age + 0.5) - to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+# Probabilty of Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+
+#Price per USD per kg is dependent on size of fish
+Price <- c(0.71,3.25,4.31)
+
+
+```
+
+```{r scenarios}
+#Length (cm) at which a fish is vulnerable to fishing mortality----
+Lc = trunc(Length)
+
+# Hold mortality constant through time
+Z = Z.2012
+
+
+Scenarios = expand.grid(Lc, Z) %>%
+            select(Z = Var2, Lc = Var1) %>%
+            mutate(Label = paste(Z, Lc, sep = "-"))
+```
+
+
+```{r matrix_params}
+#gear selectivity
+
+Lc =100
+Va = ifelse(Length < Lc, 0, 1)
+
+#fishing mortality
+
+F = Z.2012 - M 
+
+#survival probabilty
+
+Sa <- exp(-M - ( Va * (F/12)))
+
+```
+
+
+```{r build_matrix}
+
+A = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+
+
+for (r in 2:18) {
+  
+  j = r - 1 
+  
+  A[r, j] =  Sa[j]
+
+}
+
+A[maxAge, maxAge] = Sa[maxAge]
+
+```
+
+
+```{r}
+
+N0 = as.numeric(IC[1, ])
+
+pop <- matrix(0, maxAge, time_horizon + 1)
+pop[, 1] <- N0
+
+for (i in 1:time_horizon) {
+  # Survival
+  pop[, i + 1] <- A %*% pop[, i]
+  # Reproduction
+  Ne <- sum(fa * Ma * females * pop[, i])
+  
+  
+  pop[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+}
+
+
+pop[,90:100]
+matplot(0:time_horizon, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
+
+```
+
