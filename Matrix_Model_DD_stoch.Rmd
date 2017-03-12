@@ -103,7 +103,7 @@ F = Z.2012 - M
 
 #survival probabilty
 
-Sa <- exp(-M - ( Va * (F/12)))
+Sa <- exp(-M - ( Va * (F)))
 
 ```
 
