@@ -164,3 +164,54 @@ MyTheme(p)
 #dev.off()
 ```
 
+```{r opt_Real}
+
+
+#pdf("./plots/compare_opt.pdf") 
+
+
+
+currents <- c(0.3, 32)
+
+
+
+#effort
+
+curr_eff <- 0.3
+comp_eff <- 0.3*0.5
+NPV_curr_eff <- NPV_all[which(NPV_all$Value == curr_eff & NPV_all$Type == "effort"), 2]
+NPV_comp_eff <- NPV_all[which(NPV_all$Value == comp_eff & NPV_all$Type == "effort"), 2]
+
+
+#selectivity
+
+curr_sel <- 32
+comp_sel <- 65
+NPV_curr_sel <- NPV_all[which(NPV_all$Value == curr_eff & NPV_all$Type == "selectivity"), 2]
+NPV_comp_sel <- NPV_all[which(NPV_all$Value == comp_eff & NPV_all$Type == "effort"), 2]
+
+#seasonal closure
+
+comp_season <- 3
+NPV_comp_eff <- NPV_all[which(NPV_all$Value == comp_eff & NPV_all$Type == "effort"), 2]
+
+
+
+
+
+p = NPV_all %>%
+  group_by(Type) %>%
+  summarise(opt = max(NPV)) %>%
+
+p = ggplot(PV_plot, aes( year, (Profit/1000), group = Type)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type), size =1 ) +
+  #scale_y_continuous(breaks = c(seq(-100,4000,600))) +
+  scale_x_continuous(breaks = c(seq(0,20, 2))) +
+  labs(x = "Time (years)", y = "Real Profits (thousand USD)", color = "Management \nIntervention") +
+  theme_minimal()
+
+MyTheme(p)  
+
+#dev.off()
+```
