@@ -1,0 +1,242 @@
+---
+title: "Matrix Model with Density Dependence and Uncertainty"
+output: html_document
+---
+
+```{r setup}
+rm(list=ls())
+
+library(tidyverse)
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+IC <- read.csv('IC.csv')
+
+#Set Model----
+time_horizon = 100
+
+# Recruits in unfished pop
+R0 = 10000
+
+# Calcualted total instantaneous mortality
+Z.2012 = 0.579336
+
+```
+
+
+```{r Parameters}
+Linf = 122.1
+K = 0.172
+to = 0.919
+  
+Wa = 0.024
+  
+Wb = 2.824
+  
+maxAge = 18
+
+#Length (cm) at which a fish is 50/95 percent likely to be mature
+m50 = 55
+
+m95 = 62.7
+
+females = 0.6
+
+#Natural mortality
+M <- K * 1.5
+
+
+#Steepness parameter h - when you dont have a study use 0.7
+h=0.7
+```
+
+
+
+```{r Data}
+#Morphology ----
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf * (1 - exp(-K * ((Age + 0.5) - to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+# Probabilty of Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+
+#Price per USD per kg is dependent on size of fish
+Price <- c(0.71,3.25,4.31)
+
+
+```
+
+
+```{r matrix_params}
+#Gear selectivity 
+Lc = trunc(Length)
+
+#fishing mortality
+
+F = Z.2012 - M 
+
+#survival probabilty for different Lc
+
+Sa = matrix(NA, maxAge, length(Lc))
+
+for (i in 1:length(Lc)){
+
+  Va = ifelse(Length < Lc[i], 0, 1)
+  Sa[,i] <- exp(-M - ( Va * (F)))
+  
+}
+
+```
+
+```{r}
+# Spawning potential (SP) of a Pristine population as a matrix
+
+IC_unfished <- rep(NA, maxAge) 
+IC_unfished[1] <- R0 
+P_unfished <- exp(-M)
+
+for(i in 2:maxAge) {
+  IC_unfished[i] <- IC_unfished[i-1]* exp(-M)
+  
+}
+
+A_unfished = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+diag(A_unfished[-1, -maxAge]) <- rep(P_unfished, maxAge -1)
+
+pop_unfished <- matrix(0, maxAge, time_horizon + 1)
+pop_unfished[, 1] <- IC_unfished
+
+for(i in 1:time_horizon) {
+  # Survival
+  pop_unfished[ , i+1] <- A_unfished %*% pop_unfished[, i]
+  # Reproduction
+  Ne <- sum(fa * Ma * females * pop_unfished[, i])
+  pop_unfished[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+}
+
+matplot(0:time_horizon, t(pop_unfished), type = "l", xlab = "Time",  ylab = "Abundance")
+  
+SP_unfished <- sum(fa * Ma * females * pop_unfished[, time_horizon])
+```
+
+```{r}
+#Estimating Initial COndition for fishing scenarios
+
+time_fishing <- (2012 - 1970)
+pop_IC <- matrix(0, maxAge, time_fishing  +1)
+pop_IC[, 1] <- pop_unfished[,time_horizon]
+
+#Survival at current selectivity level
+
+Va_IC <- ifelse(Length < 32, 0, 1)
+Sa_IC <- exp(-M - ( Va_IC * (F)))
+
+#A matrix to estimate initial condition
+
+A_IC = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+
+for (r in 2:18) {
+  
+  j = r - 1 
+  
+  A_IC[r, j] =  Sa_IC[j]
+
+}
+
+A_IC[maxAge, maxAge] = Sa_IC[maxAge]
+
+#Estimating population after years of fishing 
+
+for(i in 1:time_fishing) {
+  # Survival
+  pop_IC[ , i+1] <- A_IC %*% pop_IC[, i]
+  # Reproduction
+  Ne <- sum(fa * Ma * females * pop_IC[, i])
+  pop_IC[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+}
+
+matplot(0:time_fishing, t(pop_IC), type = "l", xlab = "Time",  ylab = "Abundance")
+  
+  
+```
+
+
+
+```{r build_matrix}
+
+#Estimating Spwaning Potential (SP) for each mesh size
+
+SP_fished <- rep(NA, length(Lc))
+plots <- list()
+
+for (i in 1:length(Lc)) {
+  
+  A = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+  
+  for (r in 2:18) {
+  
+  j = r - 1 
+  
+  A[r, j] =  Sa[j,i]
+
+A[maxAge, maxAge] = Sa[maxAge,i]
+
+}
+
+N0 = pop_IC[,time_fishing]
+
+pop <- matrix(0, maxAge, time_horizon + 1)
+pop[, 1] <- N0
+
+for (e in 1:time_horizon) {
+  # Survival
+  pop[, e + 1] <- A %*% pop[, e]
+  # Reproduction
+  Ne <- sum(fa * Ma * females * pop[, e])
+  
+  
+  pop[1, e + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+  
+  
+
+}
+
+p=  matplot(0:time_horizon, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
+SP_fished[i] <- sum(fa * Ma * females * pop[, time_horizon])
+plots[[i]] <- p 
+
+}
+
+
+
+
+
+```
+
+
+
+
+```{r}
+# Calculating Spawning Potential Ratio (SPR)
+
+SPR <- SP_fished/ SP_unfished
+SPR_plot <- data.frame(Lc, SPR*100)
+
+ggplot(data= SPR_plot, aes(Lc, SPR))+
+  geom_line()+
+  geom_hline(yintercept = 0.4, col="red")+
+  xlab("Length at first capture in cm (Lc)")
+
+```
+
