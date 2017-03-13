@@ -1,12 +1,15 @@
 
-Model_fun = function(Z,Lc,months.open) {
-  # Z = x[[1]]
-  # Z = x$Z
-  # 
-  # Lc = x$Lc #[[2]]
-  # 
-  # months.open = x$months.open #x[[3]]
-
+Model_fun = function(x) {
+  Z = x[[1]]
+  
+  Lc = x[[2]]
+  
+  months.open = x[[3]]
+  
+  recovery = x[[4]]
+  
+  print(paste( months.open, Z, Lc, sep = "-"))
+  
   R0. = R0
   maxAge. = maxAge
   h. = h
@@ -21,20 +24,25 @@ Model_fun = function(Z,Lc,months.open) {
   
   #F converted to monthly
   
-  F = (Z - M) / 12
+  Fconditional = (Z - M) / 12
+  
+  #print(paste("F", Fconditional*12, sep = " = ")) 
   
   F2012 = Z.2012 - M
   
-
+  
   
   # track model progress
-  # print(paste("F", F, sep = " = "))
+
   # 
-  # print(paste("Lc", x$Lc, sep = " = "))
+   #print(paste("Lc", Lc, sep = " = "))
   # 
   # print(x$months.open[1])
   
+  ##############################################################################  
+  
   #Pristine Inital condition----    
+  
   
   # R0 <- unfished recruits
   unfished[1] = R0.
@@ -46,6 +54,8 @@ Model_fun = function(Z,Lc,months.open) {
     
   }
   
+  
+  ##############################################################################    
   
   #Overfished Inital condition-----
   N_at[1,] = InitialCondition
@@ -87,6 +97,10 @@ Model_fun = function(Z,Lc,months.open) {
   
   for (t in 2:NumYears) {
     
+    F = ifelse((t - 1) <= recovery, 0, Fconditional)
+   
+ 
+    
     year[t] = t - 1 
     
     #Beverton-Holt spawner recruit relationship-----
@@ -110,7 +124,7 @@ Model_fun = function(Z,Lc,months.open) {
       
       
       
-      Catch.monthly[m, ] = (((Va * F* open[m]) / (Va * F*open[m] + Mseasonal)) * month_N_at[m, ] * (1 - exp(-Mseasonal - Va * F*open[m])))*(Weight/1000)
+      Catch.monthly[m, ] = (((Va * F * open[m]) / (Va * F*open[m] + Mseasonal)) * month_N_at[m, ] * (1 - exp(-Mseasonal - Va * F*open[m])))*(Weight/1000)
       
       
       Catch.monthly[1, ] = (((Va * F*open[1]) / (Va * F*open[1] + Mseasonal)) * month_N_at[1, ] * (1 - exp(-Mseasonal - Va * F*open[1])))*(Weight/1000)
@@ -122,14 +136,17 @@ Model_fun = function(Z,Lc,months.open) {
     
     N_at[t, 2:maxAge. ] = month_N_at[12, 1:maxAge. -1 ] 
     
-    plusGroup = month_N_at[12, maxAge] + month_N_at[12, maxAge - 1]
+    plusGroup = month_N_at[12, maxAge] + N_at[t - 1, maxAge] * exp(-M - (months.open * Va[maxAge] * (F)))
     
     N_at[t, maxAge] = plusGroup
+    
+    
     
     # Annual catch       
     Catch[t, ] = colSums(Catch.monthly)
     
     CatchTotal[t] = sum(Catch[t, 1:maxAge])
+    
     
     
     # Calculate Egg production for time t----  
@@ -145,26 +162,30 @@ Model_fun = function(Z,Lc,months.open) {
     
     RevenueTotal[t] = sum(Revenue[t, 1:3])
     
+    
+    
     Biomass[t] <- sum(N_at[t, 1:maxAge.] * Weight.)
     
-    Profit[t] = RevenueTotal[t] - c*(F)*sum(open)
     
+    Profit[t] = RevenueTotal[t] - c*(F)*sum(open)
+
   }
   
-  
+
   
   Months.closed = 12 - months.open[1]
   
-  F.Mortality = F * 12
+  F.Mortality = Fconditional * 12
   
   Selectivity = Lc
   
   Out = cbind(Months.closed, F.Mortality, Selectivity, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
   
   
-  #NPV = (sum(PresentValue(Profit, discount = 0.09, year)))
-  
-  #final = list(Out, NPV)
+  # NPV = (sum(PresentValue(Profit, discount = 0.09, year)))
+  # 
+  # final = list(Out, NPV)
   
   return(Out)
 }
+

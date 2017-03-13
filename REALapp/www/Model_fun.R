@@ -8,9 +8,9 @@ Model_fun = function(x) {
   
   recovery = x[[4]]
   
+  NumYears = x[[5]]
   
   
-  NumYears = 20
   
   R0 = 355770 
   
