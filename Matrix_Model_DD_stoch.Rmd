@@ -148,4 +148,28 @@ pop[,90:100]
 matplot(0:time_horizon, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
 
 ```
+```{r}
+
+
+Linf = 122.1
+K = 0.172
+to = 0.919
+
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf * (1 - exp(-K * ((Age + 0.5) - to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+# Probabilty of Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+```
 
