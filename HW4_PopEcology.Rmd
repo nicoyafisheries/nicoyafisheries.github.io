@@ -175,15 +175,21 @@ matplot(0:time_fishing, t(pop_IC), type = "l", xlab = "Time",  ylab = "Abundance
 
 ```{r build_matrix}
 
-#Estimating Spwaning Potential (SP) for each mesh size
+#Estimating Spwaning Potential (SP) and Catch for different Lc
 
 SP_fished <- rep(NA, length(Lc))
+Catch <- matrix(NA, maxAge, length(Lc))
 plots <- list()
 
+#Initial Populaiton
+N0 = pop_IC[,time_fishing]
+
+#Leslie matrix for each Lc
+
+A = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+
 for (i in 1:length(Lc)) {
-  
-  A = matrix(data = 0, nrow = maxAge, ncol = maxAge)
-  
+
   for (r in 2:18) {
   
   j = r - 1 
@@ -194,8 +200,6 @@ A[maxAge, maxAge] = Sa[maxAge,i]
 
 }
 
-N0 = pop_IC[,time_fishing]
-
 pop <- matrix(0, maxAge, time_horizon + 1)
 pop[, 1] <- N0
 
@@ -205,15 +209,14 @@ for (e in 1:time_horizon) {
   # Reproduction
   Ne <- sum(fa * Ma * females * pop[, e])
   
-  
   pop[1, e + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
   
-  
-
 }
 
-p=  matplot(0:time_horizon, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
-SP_fished[i] <- sum(fa * Ma * females * pop[, time_horizon])
+Catch[,i] <- (((Sa[,i] * F) / (Sa[,i] * F + M)) * pop[,time_horizon + 1] * (1 - exp(-M - Sa[,i] * F)))*(Weight/1000)
+
+p=  matplot(0:time_horizon+1, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
+SP_fished[i] <- sum(fa * Ma * females * pop[, time_horizon+1])
 plots[[i]] <- p 
 
 }
@@ -237,6 +240,26 @@ ggplot(data= SPR_plot, aes(Lc, SPR))+
   geom_line()+
   geom_hline(yintercept = 0.4, col="red")+
   xlab("Length at first capture in cm (Lc)")
+
+#Calculating Revenues 
+
+Revenue = matrix(NA, maxAge, length(Lc))
+
+Revenue[1:2, ] = Catch[1:2, ] * Price[1] 
+  
+Revenue[3:4, ] = Catch[3:4, ] * Price[2] 
+  
+Revenue[5:maxAge, ] = Catch[5:maxAge,] * Price[3] 
+  
+RevenueTotal = colSums(Revenue)
+
+Revenues_plot <- data.frame(Lc, RevenueTotal)
+
+ggplot(data= Revenues_plot, aes(Lc, RevenueTotal))+
+  geom_line()+
+  #geom_hline(yintercept = , col="red")+
+  xlab("Length at first capture in cm (Lc)")
+
 
 ```
 
