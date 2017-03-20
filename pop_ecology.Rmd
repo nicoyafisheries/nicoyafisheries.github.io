@@ -56,3 +56,24 @@ summary(mod3)
 confint(mod3)
 ```
 
+```{r}
+#Changes in r over time
+
+Year <- incopesca$Year
+lag_Year <- Year-1
+pop <- incopesca$Corvina.y.Robalo
+lag_pop <- incopesca$Corvina.y.Robalo[match(lag_Year, incopesca$Year)]
+r<-(lag_pop - pop)/lag_pop
+
+plot <- data.frame(Year, r)
+
+ggplot(plot, aes(y = r, x = Year)) +
+  geom_point()+
+  stat_smooth(method = "lm") 
+
+linear_r <- lm(r ~ Year)
+confint(linear_r)
+
+
+```
+
