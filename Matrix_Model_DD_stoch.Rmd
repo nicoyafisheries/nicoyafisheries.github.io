@@ -148,4 +148,78 @@ pop[,90:100]
 matplot(0:time_horizon, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
 
 ```
+```{r}
+
+
+Linf = 122.1
+K = 0.172
+to = 0.919
+
+
+#Our max age is 18 years
+Age <- seq(1,maxAge,1)
+
+#Length at median age 
+Length <- Linf * (1 - exp(-K * ((Age + 0.5) - to)))
+
+#Converts lengths (cm) to weight (g)
+Weight <- Wa*Length^Wb
+
+# Probabilty of Maturity
+Ma = 1/(1 + exp(-log(19)*((Length - m50)/(m95 - m50))))
+
+#realitve fecundity - produce about 41 eggs per gram 
+#SOURCE: https://www.scribd.com/doc/81002346/Crecimiento-y-Reproduccion-de-corvina
+fa <- Weight*41
+```
+
+
+```{r}
+# Spawning potential (SP) of a Pristine population as a matrix
+
+IC_unfished <- rep(NA, maxAge) 
+IC_unfished[1] <- R0 
+P_unfished <- exp(-M)
+
+for(i in 2:maxAge) {
+  IC_unfished[i] <- IC_unfished[i-1]* exp(-M)
+  
+}
+
+A_unfished = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+diag(A_unfished[-1, -maxAge]) <- rep(P_unfished, maxAge -1)
+
+pop_unfished <- matrix(0, maxAge, time_horizon + 1)
+pop_unfished[, 1] <- IC_unfished
+
+for(i in 1:time_horizon) {
+  # Survival
+  pop_unfished[ , i+1] <- A_unfished %*% pop_unfished[, i]
+  # Reproduction
+  Ne <- sum(fa * Ma * females * pop_unfished[, i])
+  pop_unfished[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+}
+
+matplot(0:time_horizon, t(pop_unfished), type = "l", xlab = "Time",  ylab = "Abundance")
+  
+SP_unfished <- sum(fa * Ma * females * pop_unfished[, time_horizon])
+```
+
+
+```{r}
+sims = replicate(100,  matrix_w_uncertainty(Lc = 75, Z = Z.2012, Loo = Linf, k = K, t0 = to, maxAge = 18))
+
+
+sims2 = sims[ , colSums(is.na(sims)) == 0]
+```
+
+
+```{r}
+# Calculate PPIs
+PPIlevels <- c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)
+PPIs <- apply(sims2, 1, quantile, probs = PPIlevels)
+matplot(0:time_horizon, t(PPIs), type = "l", xlab = "Time",  ylab = "Abundance", 
+        col = "black", lty = 1)
+abline(h = 0.4, col = "red")
+```
 

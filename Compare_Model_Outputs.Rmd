@@ -208,10 +208,11 @@ OurColors = c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )
 pdf("./plots/compare_opt_biomass.pdf")
 
 p = ggplot(PV_plot, aes( year+1, Biomass/(1000 * 1000), group = Type2)) +
-  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  #geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
   geom_line(aes(color = Type2), size =1) +
   scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
   scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  scale_y_continuous(breaks = c(seq(500,2500,500))) +
   labs(x = "Time (years)", y = "Biomass (kMT)", color = "Management \nApproach") +
   theme_minimal()
 
@@ -227,15 +228,15 @@ dev.off()
 
 
 
-pdf("./plots/compare_opt.pdf")     
-#pdf("./plots/compare_opt_short.pdf")
+#pdf("./plots/compare_opt.pdf")     
+pdf("./plots/compare_opt_short.pdf")
 
-p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+p1 = ggplot(filter(PV_plot, year < 5), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
   geom_line(aes(color = Type2), size =1) +
   scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
   scale_y_continuous(breaks = c( seq(0,1200,200))) +
-  scale_x_continuous(breaks = c(seq(0,22,2)), expand=c(0,0.5)) +
+  scale_x_continuous(breaks = c(seq(0,22,1)), expand=c(0,0.5)) +
   #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
   labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
   scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
