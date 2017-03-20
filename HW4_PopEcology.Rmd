@@ -13,7 +13,7 @@ sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 IC <- read.csv('IC.csv')
 
 #Set Model----
-time_horizon = 100
+time_horizon = 25
 
 # Recruits in unfished pop
 R0 = 10000
@@ -178,7 +178,9 @@ matplot(0:time_fishing, t(pop_IC), type = "l", xlab = "Time",  ylab = "Abundance
 #Estimating Spwaning Potential (SP) and Catch for different Lc
 
 SP_fished <- rep(NA, length(Lc))
-Catch <- matrix(NA, maxAge, length(Lc))
+Catch <- rep(NA, maxAge)
+Revenue <- rep(NA, maxAge)
+RevenueAnual <- matrix(NA, time_horizon, length(Lc))
 plots <- list()
 
 #Initial Populaiton
@@ -211,12 +213,18 @@ for (e in 1:time_horizon) {
   
   pop[1, e + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
   
+  Catch <- (((Sa[,i] * F) / (Sa[,i] * F + M)) * pop[,e+1] * (1 - exp(-M - Sa[,i] * F)))*(Weight/1000)
+  Revenue[1:2] = Catch[1:2] * Price[1] 
+  Revenue[3:4] = Catch[3:4] * Price[2] 
+  Revenue[5:maxAge] = Catch[5:maxAge] * Price[3] 
+  RevenueAnual[e,i] = sum(Revenue)
+
+
 }
 
-Catch[,i] <- (((Sa[,i] * F) / (Sa[,i] * F + M)) * pop[,time_horizon + 1] * (1 - exp(-M - Sa[,i] * F)))*(Weight/1000)
 
 p=  matplot(0:time_horizon+1, t(pop), type = "l", xlab = "Time",  ylab = "Abundance")
-SP_fished[i] <- sum(fa * Ma * females * pop[, time_horizon+1])
+SP_fished[i] <- sum(fa * Ma * females * pop[, time_horizon])
 plots[[i]] <- p 
 
 }
@@ -241,21 +249,19 @@ ggplot(data= SPR_plot, aes(Lc, SPR))+
   geom_hline(yintercept = 0.4, col="red")+
   xlab("Length at first capture in cm (Lc)")
 
-#Calculating Revenues 
+#Calculating NPV
 
-Revenue = matrix(NA, maxAge, length(Lc))
+DR <- 0.9
+NPV_Anual<- matrix(NA, time_horizon, length(Lc))
 
-Revenue[1:2, ] = Catch[1:2, ] * Price[1] 
-  
-Revenue[3:4, ] = Catch[3:4, ] * Price[2] 
-  
-Revenue[5:maxAge, ] = Catch[5:maxAge,] * Price[3] 
-  
-RevenueTotal = colSums(Revenue)
+for (a in 1:time_horizon){
+  NPV_Anual[a,] <- RevenueAnual[a,]/((1+DR)^a)
+}
 
-Revenues_plot <- data.frame(Lc, RevenueTotal)
+NPV <- colSums(NPV_Anual)
+NPV_plot <- data.frame(Lc, NPV)
 
-ggplot(data= Revenues_plot, aes(Lc, RevenueTotal))+
+ggplot(data= NPV_plot, aes(Lc, NPV))+
   geom_line()+
   #geom_hline(yintercept = , col="red")+
   xlab("Length at first capture in cm (Lc)")
