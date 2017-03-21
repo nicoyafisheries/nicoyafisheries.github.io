@@ -63,16 +63,16 @@ Year <- incopesca$Year
 lag_Year <- Year-1
 pop <- incopesca$Corvina.y.Robalo
 lag_pop <- incopesca$Corvina.y.Robalo[match(lag_Year, incopesca$Year)]
-r<-(lag_pop - pop)/lag_pop
+#r<-(lag_pop - pop)/lag_pop
+z <- log(lag_pop/pop)
+plot <- data.frame(Year, z)
 
-plot <- data.frame(Year, r)
-
-ggplot(plot, aes(y = r, x = Year)) +
+ggplot(plot, aes(y = z, x = Year)) +
   geom_point()+
   stat_smooth(method = "lm") 
 
-linear_r <- lm(r ~ Year)
-confint(linear_r)
+linear_z <- lm(z ~ Year)
+confint(linear_z)
 
 
 ```
