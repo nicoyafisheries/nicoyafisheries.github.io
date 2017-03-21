@@ -207,7 +207,7 @@ SP_unfished <- sum(fa * Ma * females * pop_unfished[, time_horizon])
 
 
 ```{r}
-sims = replicate(100,  matrix_w_uncertainty(Lc = 75, Z = Z.2012, Loo = Linf, k = K, t0 = to, maxAge = 18))
+sims = replicate(5000,  matrix_w_uncertainty(Lc = 75, Z = Z.2012, Loo = Linf, k = K, t0 = to, maxAge = 18))
 
 
 sims2 = sims[ , colSums(is.na(sims)) == 0]
@@ -218,7 +218,7 @@ sims2 = sims[ , colSums(is.na(sims)) == 0]
 # Calculate PPIs
 PPIlevels <- c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)
 PPIs <- apply(sims2, 1, quantile, probs = PPIlevels)
-matplot(0:time_horizon, t(PPIs), type = "l", xlab = "Time",  ylab = "Abundance", 
+matplot(0:time_horizon, t(PPIs), type = "l", xlab = "Time",  ylab = "SPR", 
         col = "black", lty = 1)
 abline(h = 0.4, col = "red")
 ```

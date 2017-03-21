@@ -1,6 +1,8 @@
 
-matrix_w_uncertainty = function(Lc, Z, Loo, k, t0, maxAge,time_horizon = 100, Wa = 0.024, Wb = 2.824, m50 = 55, m95 = 62.7, females = 0.6, h = 0.7, SP_unfished = 287860317){
+matrix_w_uncertainty = function(Lc, Z, Loo, k, t0, maxAge,time_horizon = 100, Wa = 0.024, Wb = 2.824, m50 = 55, m95 = 62.7, females = 0.6, h = 0.7){
 
+
+  
   #just to start while loop
   Linf = -1
   
@@ -37,7 +39,35 @@ matrix_w_uncertainty = function(Lc, Z, Loo, k, t0, maxAge,time_horizon = 100, Wa
   fa <- Weight*41  
   
   
-  
+#####################
+  #UNFISHED
+  # 
+  # IC_unfished <- rep(NA, maxAge)
+  # IC_unfished[1] <- R0
+  # P_unfished <- exp(-M)
+  # 
+  # for(i in 2:maxAge) {
+  #   IC_unfished[i] <- IC_unfished[i-1]* exp(-M)
+  # 
+  # }
+  # 
+  # A_unfished = matrix(data = 0, nrow = maxAge, ncol = maxAge)
+  # diag(A_unfished[-1, -maxAge]) <- rep(P_unfished, maxAge -1)
+  # 
+  # pop_unfished <- matrix(0, maxAge, time_horizon + 1)
+  # pop_unfished[, 1] <- IC_unfished
+  # 
+  # for(i in 1:time_horizon) {
+  #   # Survival
+  #   pop_unfished[ , i+1] <- A_unfished %*% pop_unfished[, i]
+  #   # Reproduction
+  #   Ne <- sum(fa * Ma * females * pop_unfished[, i])
+  #   pop_unfished[1, i + 1] <- (19923.12 * Ne) / (17271619 + ((h - 0.2) * Ne))
+  # }
+  # 
+  # 
+  # SP_unfished <- sum(fa * Ma * females * pop_unfished[, time_horizon])
+ # ###########################
   
 Lc = Lc
 Va = ifelse(Length < Lc, 0, 1)
@@ -80,11 +110,12 @@ for (i in 1:time_horizon) {
   Ne <- sum(fa * Ma * females * pop[, i])
   
   
-  pop[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+  pop[1, i + 1] <- (19923.12 * Ne) / (17271619 + ((h - 0.2) * Ne))
 
   
 }
 
 SPR <- apply(pop, 2, FUN = function(x) (sum(fa * Ma * females * x) / SP_unfished))
+
 
 }
