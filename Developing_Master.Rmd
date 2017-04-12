@@ -28,7 +28,7 @@ Deterministic Age-Stuctured Model with Knife-edge selectivity
  Revenue <- Splits revenue by 3 commercial size classes 
 
 ```{r setup}
-rm(list=ls())
+#rm(list=ls())
 
 library(colorRamps)
 library(tidyverse)
@@ -38,7 +38,7 @@ sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
 IC <- read.csv('IC.csv')
 
 # Set Model----
-NumYears = 20
+NumYears = 21
 
 # Estimated virgin abundance of 1 yr olds    
   R0 = 355770 
@@ -214,7 +214,7 @@ Scenarios.selectivity = expand.grid(Lc, Z) %>%
             select(Label , Z = Var2, Lc = Var1) %>%
             mutate(months.open = 12, closure = 0)
 
-InitialCondition <- IC[1,]
+InitialCondition <- selectivity_opt[,7:24]#IC[1,]
 ```
 
 
@@ -227,6 +227,8 @@ Selectivity = plyr::ddply(Scenarios.selectivity, 'Label', function(x) {
   return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
 
   })
+
+
 
 NPV_selectivity = selectivity %>%
             group_by(Selectivity) %>%
@@ -286,6 +288,48 @@ write.csv(Seasonal, "./data/Model_Output/Out_Seasonal.csv")
 ```
 
 
+```{r set_closer}
+
+#Scenario control-----
+
+#Length at first capture
+Lc = 32
+
+Z = Z.2012
+
+months.open = 12
+
+closure = seq(1,21,1)
+
+Scenarios.closure = expand.grid(Lc, Z, months.open, closure) %>%
+                        select(Z = Var2, Lc = Var1, months.open = Var3) %>%
+                        mutate(Label = paste(closure, Z, Lc, sep = "-")) %>%
+                        mutate( closure = closure)
+
+
+
+InitialCondition <- IC[1,]
+  #c(497.3195, 384.9299, 252.3379,141.6849,79.56998,44.69591,25.11237,14.11297,7.933598,4.461228,2.50948,1.41212,0.7949381,0.4476985,0.2522591,0.1422124,0.08021953, 0.1042105)
+```
+
+
+```{r run_closure}
+
+
+Closure = plyr::ddply(Scenarios.closure, 'Label', function(x) {
+  
+  return(Model_fun(c(x$Z, x$Lc, x$months.open, x$closure)))
+
+  })
+
+
+```
+
+
+
+```{r write_season}
+write.csv(Closure, "./data/Model_Output/Out_Closure.csv")
+```
 ### Combined
 
 

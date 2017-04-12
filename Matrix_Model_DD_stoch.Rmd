@@ -197,7 +197,7 @@ for(i in 1:time_horizon) {
   pop_unfished[ , i+1] <- A_unfished %*% pop_unfished[, i]
   # Reproduction
   Ne <- sum(fa * Ma * females * pop_unfished[, i])
-  pop_unfished[1, i + 1] <- (560 * Ne) / (17271619 + ((h - 0.2) * Ne))
+  pop_unfished[1, i + 1] <- (19923.12 * Ne) / (17271619 + ((h - 0.2) * Ne))
 }
 
 matplot(0:time_horizon, t(pop_unfished), type = "l", xlab = "Time",  ylab = "Abundance")
@@ -207,7 +207,7 @@ SP_unfished <- sum(fa * Ma * females * pop_unfished[, time_horizon])
 
 
 ```{r}
-sims = replicate(5000,  matrix_w_uncertainty(Lc = 75, Z = Z.2012, Loo = Linf, k = K, t0 = to, maxAge = 18))
+sims = replicate(1000,  matrix_w_uncertainty(Lc = 75, Z = Z.2012, Loo = Linf, k = K, t0 = to, maxAge = 18))
 
 
 sims2 = sims[ , colSums(is.na(sims)) == 0]
@@ -216,10 +216,22 @@ sims2 = sims[ , colSums(is.na(sims)) == 0]
 
 ```{r}
 # Calculate PPIs
-PPIlevels <- c(0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99)
+PPIlevels <- c( 0.05, 0.25, 0.5, 0.75, 0.95)
 PPIs <- apply(sims2, 1, quantile, probs = PPIlevels)
 matplot(0:time_horizon, t(PPIs), type = "l", xlab = "Time",  ylab = "SPR", 
         col = "black", lty = 1)
 abline(h = 0.4, col = "red")
+
+
+```
+```{r}
+simsin = tail(sims2, 1) 
+
+target = simsin[ simsin <= 0.44 ] 
+
+target = target [ target >= 0.36 ] 
+
+prob = length(target)/length(simsin)
+
 ```
 

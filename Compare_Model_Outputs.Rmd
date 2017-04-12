@@ -9,7 +9,7 @@ Compare optimal selection across strategies
 
 ```{r setup, include=FALSE}
 
-rm(list=ls())
+#rm(list=ls())
 
 library(colorRamps)
 library(tidyverse)
@@ -221,36 +221,41 @@ MyTheme(p)
 dev.off()
 ```
 
+```{r}
+opt_plot = read.csv("opt_results.csv")
+
+opt_plot$Type2 <- factor(opt_plot$Type, levels = line.levels)
+```
 
 
 ```{r opt_Real}
 
 
 
-
 #pdf("./plots/compare_opt.pdf")     
-pdf("./plots/compare_opt_short.pdf")
+#pdf("./plots/compare_opt_short.pdf")
 
-p1 = ggplot(filter(PV_plot, year < 5), aes( (year+1), (Profit/1000), group = Type2, alpha = Type2)) +
+p1 = ggplot(filter(PV_plot, year <22), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
   geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
   geom_line(aes(color = Type2), size =1) +
   scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
   scale_y_continuous(breaks = c( seq(0,1200,200))) +
-  scale_x_continuous(breaks = c(seq(0,22,1)), expand=c(0,0.5)) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
   #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
   labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
   scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
   guides(color = guide_legend(title.hjust = 0.5), 
          alpha = FALSE) +
   theme_minimal() +
-  theme(legend.position = c(0.2,.7))
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
 
   
 
 
 MyTheme(p1)  
 
-dev.off()
+#dev.off()
 ```
 
 ```{r alpha_closure}
@@ -404,7 +409,7 @@ MyTheme(p)
 
 #dev.off()
 ```
-=======
+
 ```{r alpha_effort}
 pdf("./plots/compare_opt_effort.pdf")
 
@@ -428,5 +433,92 @@ p1 = ggplot(filter(PV_plot, year < 21), aes( (year+1), (Profit/1000), group = Ty
 MyTheme(p1)  
 
 dev.off()
+
 ```
->>>>>>> a4d9ea02369f982eee4edf68b310bab64665c28f
+
+
+```{r all_effort_NPV}
+
+pdf("./plots/NPV_effort_FINAL.pdf")
+
+p = ggplot(NPV_effort, aes(Value, NPV/1000 )) +
+      geom_point(size = 3) +
+      scale_x_continuous(breaks = c(seq(0,1,0.1))) +
+      #scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = (Z.2012-M), alpha =0.5, lty =2) +
+        #geom_vline(xintercept = (Z.2012-M)*0.5, alpha =0.5, lty =2) +
+      geom_vline(xintercept = 0.134, alpha =0.5, lty =2) + 
+      labs(x = "Effort", y = "NPV (thousand USD)") +
+  theme_minimal()
+  
+MyTheme(p)  
+
+dev.off()
+
+```
+
+```{r all_selectivity_NPV}
+
+pdf("./plots/NPV_selectivity_FINAL.pdf")
+
+p = ggplot(NPV_selectivity, aes(Value, NPV/1000 )) +
+      geom_point(size = 3) +
+      scale_x_continuous(breaks = c(seq(0,120,10))) +
+      #scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = (Z.2012-M), alpha =0.5, lty =2) +
+        #geom_vline(xintercept = (Z.2012-M)*0.5, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = 0.134, alpha =0.5, lty =2) + 
+      labs(x = "Length at fist capture (cm)", y = "NPV (thousand USD)") +
+  theme_minimal() 
+  
+MyTheme(p)  
+
+dev.off()
+
+```
+
+
+```{r all_seasonal_NPV}
+
+pdf("./plots/NPV_seasonal_FINAL.pdf")
+
+p = ggplot(NPV_seasonal, aes(Value, NPV/1000 )) +
+      geom_point(size = 3) +
+      scale_x_continuous(breaks = c(seq(0,12,1))) +
+      #scale_y_continuous(breaks = c(seq(-15000,17000,5000))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = (Z.2012-M), alpha =0.5, lty =2) +
+        #geom_vline(xintercept = (Z.2012-M)*0.5, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = 0.134, alpha =0.5, lty =2) + 
+      labs(x = "Months closed to fishing", y = "NPV (thousand USD)") +
+  theme_minimal() 
+  
+MyTheme(p)  
+
+dev.off()
+
+```
+
+
+```{r all_closure_NPV}
+
+pdf("./plots/NPV_closure_FINAL.pdf")
+
+p = ggplot(NPV_closure, aes(Value, NPV/1000 )) +
+      geom_point(size = 3) +
+      scale_x_continuous(breaks = c(seq(0,20,2))) +
+      scale_y_continuous(breaks = c(seq(0,2500,500))) +
+      geom_hline(yintercept = 0, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = (Z.2012-M), alpha =0.5, lty =2) +
+        #geom_vline(xintercept = (Z.2012-M)*0.5, alpha =0.5, lty =2) +
+      #geom_vline(xintercept = 0.134, alpha =0.5, lty =2) + 
+      labs(x = "Years closed", y = "NPV (thousand USD)") +
+  theme_minimal() 
+  
+MyTheme(p)  
+
+dev.off()
+
+```
