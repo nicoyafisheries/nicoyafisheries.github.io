@@ -1,0 +1,257 @@
+---
+title: "Plots for poster"
+author: "Alex Smith"
+date: "4/10/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+#rm(list=ls())
+
+library(colorRamps)
+library(tidyverse)
+
+sapply(list.files(pattern="[.]R$", path="./Functions", full.names=TRUE), source)
+
+```
+
+```{r}
+comp_all = read.csv( "./data/Model_Output/barplot_data2.csv")
+
+
+opt = read.csv( "./data/Model_Output/barplot_data.csv")
+
+label.order = c("closure", "seasonal", "effort","selectivity",  "combined")
+
+  #p = rbind(comp_all[,-1], opt) %>% 
+#labels = (c("Compliance", "Optimal")),    
+
+#pdf("./plots/compare_NPV.pdf", width = 10, height = 6)
+
+p =  ggplot() +
+    geom_bar( data = opt, aes(factor(Type), (NPV/1000000), fill = Fill), stat = "identity", position = "identity") +
+    scale_x_discrete(limits=c(label.order)) +
+    geom_bar( data = comp_all, aes(factor(Type), (NPV/1000000), fill = Fill), stat = "identity", position = "identity") +
+    scale_fill_manual( labels = rev(c( "BCS","Compliance")), values = (c("#2E3192","#00A99D"))) +
+    scale_x_discrete(limits=c(label.order)) +
+    geom_hline(yintercept = 0,  color = "#ED1C24" , lwd = 4) +
+    theme_minimal()+
+    labs(x = "Management Approach", y = "NPV million USD", fill = " ") +
+    scale_y_continuous(breaks = c(seq(0,4,0.5)), expand=c(0,0)) +
+    guides(fill = guide_legend(reverse=TRUE))
+
+#c("#FFB90F")
+out1 = PosterTheme(p)
+
+```
+
+```{r}
+ggsave("testplot.svg", #output name
+       plot = out1, 
+       width = 6, height  = 4, 
+       units = "cm",
+       device = "svg", #file type
+       dpi = 600) #pixels per inch
+```
+
+```{r}
+opt_plot = read.csv("./data/Model_Output/opt_results.csv")
+
+
+
+line.levels = c( "Longterm Closure", "Combined", "Gear Selectivity", "Effort Reduction","Seasonal Closure")
+
+
+opt_plot$Type2 <- factor(opt_plot$Type, levels = line.levels)
+
+
+OurColors = c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )
+```
+
+
+```{r opt_Real_all}
+
+
+
+#pdf("./plots/compare_opt.pdf")     
+#pdf("./plots/compare_opt_short.pdf")
+
+p1 = ggplot(filter(opt_plot, year <22), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual( values=c('#377eb8','#e41a1c','#4daf4a','#984ea3','#ff7f00' )) +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
+
+
+```{r opt_Real_closure}
+
+
+
+#pdf("./plots/compare_closure.pdf")     
+
+
+p1 = ggplot(filter(opt_plot, Type2 == line.levels[1]), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual(values =  "#00A99D") +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
+
+
+```{r opt_Real_combined}
+
+
+
+#pdf("./plots/compare_combined.pdf")     
+
+
+p1 = ggplot(filter(opt_plot, Type2 == line.levels[2]), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual(values =  "#00A99D")  +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
+
+
+
+```{r opt_Real_select}
+
+
+
+#pdf("./plots/compare_select.pdf")     
+
+
+p1 = ggplot(filter(opt_plot, Type2 == line.levels[3]), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual(values =  "#00A99D") +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
+
+```{r opt_Real_effort}
+
+
+
+#pdf("./plots/compare_effort.pdf")     
+
+
+p1 = ggplot(filter(opt_plot, Type2 == line.levels[4]), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual(values =  "#00A99D") +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
+
+
+
+```{r opt_Real_season}
+
+
+
+#pdf("./plots/compare_opt_season.pdf")     
+
+
+p1 = ggplot(filter(opt_plot, Type2 == line.levels[5]), aes( (year), (Profit/1000), group = Type2, alpha = Type2)) +
+  geom_hline(yintercept = 0, alpha = 0.5, lty = 2) + 
+  geom_line(aes(color = Type2), size =1) +
+  scale_alpha_manual(values = c(rep(1, 2),0.8,rep(1, 2))) +
+  scale_y_continuous(breaks = c( seq(0,1200,200))) +
+  scale_x_continuous(breaks = c(seq(0,20,2)), expand=c(0,0.5)) +
+  #scale_x_continuous(breaks = c(seq(0,4,1)), expand=c(0,0.5)) +
+  labs(x = "Time (years)", y = "Real Profits (thousand 2012 USD)", color = "Management \nApproach") +
+  scale_color_manual(values =  "#00A99D") +
+  guides(color = guide_legend(title.hjust = 0.5), 
+         alpha = FALSE) +
+  theme_minimal() +
+  theme(legend.position = c(0.2,.7)) +
+  expand_limits(x = 20)
+
+  
+
+
+PosterTheme(p1)  
+
+#dev.off()
+```
