@@ -1,0 +1,5 @@
+"","Value","NPV","Type","Fill"
+"1","56",1868352.79270542,"selectivity","compliance"
+"2","0.159",2358831.27009462,"effort","compliance"
+"3","4",1738034.82233596,"seasonal","compliance"
+"4","4-0.159-56",2451052.84748762,"combined","compliance"
