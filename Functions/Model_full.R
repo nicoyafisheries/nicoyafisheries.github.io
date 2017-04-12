@@ -11,7 +11,7 @@ Model_full = function(x) {
 
 #Our paramters for corvina reina -----   
   
-  NumYears = 20
+  NumYears = 21
 
 # Estimated virgin abundance of 1 yr olds    
   R0 = 355770 
