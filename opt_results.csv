@@ -1,0 +1,106 @@
+year,Profit,PV,Biomass,Type,Type2
+0,0,0,586703772.3,Seasonal Closure,Seasonal Closure
+1,-8704.027537,-7985.346364,692370988.5,Seasonal Closure,Seasonal Closure
+2,31450.72559,26471.4465,797076268,Seasonal Closure,Seasonal Closure
+3,72476.8012,55965.38857,897277345.8,Seasonal Closure,Seasonal Closure
+4,112079.5597,79399.98576,995092496.5,Seasonal Closure,Seasonal Closure
+5,149551.2557,97198.05496,1092484189,Seasonal Closure,Seasonal Closure
+6,185736.8735,110748.829,1189627948,Seasonal Closure,Seasonal Closure
+7,222453.9114,121689.9075,1285207305,Seasonal Closure,Seasonal Closure
+8,259228.2389,130097.9118,1377642018,Seasonal Closure,Seasonal Closure
+9,295228.908,135931.5906,1465781213,Seasonal Closure,Seasonal Closure
+10,329733.8423,139283.1384,1549020566,Seasonal Closure,Seasonal Closure
+11,362402.428,140442.8459,1627211727,Seasonal Closure,Seasonal Closure
+12,393182.3261,139789.9702,1700575954,Seasonal Closure,Seasonal Closure
+13,422171.662,137703.3814,1769680497,Seasonal Closure,Seasonal Closure
+14,449591.2956,134538.6059,1835456908,Seasonal Closure,Seasonal Closure
+15,475799.9335,130625.1818,1899243713,Seasonal Closure,Seasonal Closure
+16,501323.8409,126268.3168,1962958284,Seasonal Closure,Seasonal Closure
+17,526932.6053,121759.991,2029879391,Seasonal Closure,Seasonal Closure
+18,553964.3517,117436.9748,2102998065,Seasonal Closure,Seasonal Closure
+19,583636.9101,113511.35,2185918313,Seasonal Closure,Seasonal Closure
+20,593636.9101,113511.35,2185918313,Seasonal Closure,Seasonal Closure
+0,0,0,586703772.3,Gear Selectivity,Gear Selectivity
+1,-11827.2863,-10850.72137,706436677.2,Gear Selectivity,Gear Selectivity
+2,16143.3258,13587.51435,841768772.5,Gear Selectivity,Gear Selectivity
+3,75708.67978,58460.99182,976583445.6,Gear Selectivity,Gear Selectivity
+4,172036.7264,121875.1542,1099265829,Gear Selectivity,Gear Selectivity
+5,275281.1744,178913.8753,1209855052,Gear Selectivity,Gear Selectivity
+6,346557.922,206641.1658,1318734462,Gear Selectivity,Gear Selectivity
+7,395255.6794,216218.3921,1431013905,Gear Selectivity,Gear Selectivity
+8,452330.9921,227009.6722,1541171914,Gear Selectivity,Gear Selectivity
+9,520279.8134,239551.2792,1642901948,Gear Selectivity,Gear Selectivity
+10,591210.8037,249733.8326,1733016413,Gear Selectivity,Gear Selectivity
+11,656110.7754,254264.4789,1811718104,Gear Selectivity,Gear Selectivity
+12,711577.0683,252990.3574,1880581258,Gear Selectivity,Gear Selectivity
+13,759073.715,247593.6372,1940773116,Gear Selectivity,Gear Selectivity
+14,800847.8999,239650.9031,1992951117,Gear Selectivity,Gear Selectivity
+15,837931.1548,230043.978,2037584725,Gear Selectivity,Gear Selectivity
+16,870392.3109,219225.5048,2075408790,Gear Selectivity,Gear Selectivity
+17,898300.9745,207573.2599,2107346516,Gear Selectivity,Gear Selectivity
+18,922041.9331,195467.118,2134199201,Gear Selectivity,Gear Selectivity
+19,942086.0657,183226.0079,2156659267,Gear Selectivity,Gear Selectivity
+20,952086.0657,183226.0079,2156659267,Gear Selectivity,Gear Selectivity
+0,0,0,586703772.3,Effort Reduction,Effort Reduction
+1,11676.63992,10712.51368,695328558.4,Effort Reduction,Effort Reduction
+2,55332.14838,46571.96228,803344820,Effort Reduction,Effort Reduction
+3,100120.7772,77311.61015,907096099,Effort Reduction,Effort Reduction
+4,143464.5332,101633.8922,1008664613,Effort Reduction,Effort Reduction
+5,184619.9806,119990.3199,1110002048,Effort Reduction,Effort Reduction
+6,224463.1405,133840.0368,1211251862,Effort Reduction,Effort Reduction
+7,264965.6965,144945.3097,1311037198,Effort Reduction,Effort Reduction
+8,305597.4192,153369.0399,1407698556,Effort Reduction,Effort Reduction
+9,345437.6597,159049.0946,1500007291,Effort Reduction,Effort Reduction
+10,383683.5035,162072.0583,1587300925,Effort Reduction,Effort Reduction
+11,419946.9566,162743.2411,1669403904,Effort Reduction,Effort Reduction
+12,454159.9317,161469.6265,1746546794,Effort Reduction,Effort Reduction
+13,486428.9713,158662.7437,1819345920,Effort Reduction,Effort Reduction
+14,517007.7044,154712.7279,1888826528,Effort Reduction,Effort Reduction
+15,546315.1614,149984.2944,1956474370,Effort Reduction,Effort Reduction
+16,574971.0309,144817.8171,2024461536,Effort Reduction,Effort Reduction
+17,603899.3839,139544.9491,2096453102,Effort Reduction,Effort Reduction
+18,634682.8777,134548.797,2175867892,Effort Reduction,Effort Reduction
+19,668795.0948,130073.7372,2266862350,Effort Reduction,Effort Reduction
+20,678795.0948,130073.7372,2266862350,Effort Reduction,Effort Reduction
+0,0,0,580870516.6,Longterm Closure,Longterm Closure
+1,0,0,762105149.7,Longterm Closure,Longterm Closure
+2,0,0,960666424.4,Longterm Closure,Longterm Closure
+3,0,0,1169984798,Longterm Closure,Longterm Closure
+4,0,0,1389730301,Longterm Closure,Longterm Closure
+5,0,0,1620791775,Longterm Closure,Longterm Closure
+6,0,0,1861988412,Longterm Closure,Longterm Closure
+7,0,0,2109706558,Longterm Closure,Longterm Closure
+8,1182488.707,593451.2083,1782715903,Longterm Closure,Longterm Closure
+9,935363.8377,430667.4948,1553721573,Longterm Closure,Longterm Closure
+10,774976.1184,327358.2875,1400638070,Longterm Closure,Longterm Closure
+11,668105.0118,258912.6396,1294543985,Longterm Closure,Longterm Closure
+12,593593.4678,211043.0904,1215784616,Longterm Closure,Longterm Closure
+13,534891.3492,174470.1365,1153326058,Longterm Closure,Longterm Closure
+14,486240.5312,145505.7601,1101989459,Longterm Closure,Longterm Closure
+15,445378.7949,122273.422,1059265811,Longterm Closure,Longterm Closure
+16,411110.0143,103546.1817,1023507884,Longterm Closure,Longterm Closure
+17,382365.1419,88354.32803,993379265.6,Longterm Closure,Longterm Closure
+18,358069.4361,75908.479,967775856,Longterm Closure,Longterm Closure
+19,337329.0645,65607.01839,945837790,Longterm Closure,Longterm Closure
+20,327329.0645,65607.01839,945837790,Longterm Closure,Longterm Closure
+0,0,0,580870516.5,Combined,Combined
+1,-7756.343927,-7115.91186,705783204.2,Combined,Combined
+2,22671.24197,19081.93079,845193532.7,Combined,Combined
+3,81800.57024,63165.049,983820881.9,Combined,Combined
+4,175435.7974,124283.1418,1110952194,Combined,Combined
+5,276243.4317,179539.2765,1226751387,Combined,Combined
+6,347470.8837,207185.535,1340981815,Combined,Combined
+7,395575.572,216393.3843,1458885969,Combined,Combined
+8,452690.3856,227190.0397,1574703272,Combined,Combined
+9,520453.1735,239631.099,1682114058,Combined,Combined
+10,591234.9103,249744.0155,1777838944,Combined,Combined
+11,656409.3919,254380.2026,1861891130,Combined,Combined
+12,712634.6444,253366.3624,1935668833,Combined,Combined
+13,761123.7441,248262.3129,2000246386,Combined,Combined
+14,803861.3658,240552.6721,2056304182,Combined,Combined
+15,841789.074,231103.1236,2104367716,Combined,Combined
+16,875013.5514,220389.4555,2145262836,Combined,Combined
+17,903694.2905,208819.5105,2179996346,Combined,Combined
+18,928273.8658,196788.2487,2209396923,Combined,Combined
+19,949210.53,184611.6426,2234146673,Combined,Combined
+20,959210.53,184611.6426,2234146673,Combined,Combined
