@@ -1,5 +1,5 @@
 
-PresentValue = function(Value, discount, t){
+mypresentvalue = function(Value, discount, t){
   
   PV = Value / ((1 + discount) ^ t )
   
