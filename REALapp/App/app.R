@@ -11,17 +11,20 @@ library(shiny)
 library(tidyverse)
 library(tools)
 library(stringr)
+library(shinythemes)
 
-
-source("../www/Model_Fun.R")
-source("../www/PresentValue.R")
-source("../www/Mode.R")
+source("./www/modelfun.R")
+source("./www/mypresentvalue.R")
+source("./www/mymode.R")
 
 # Define UI for application that draws a histogram
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("yeti"),
+                #shinythemes::themeSelector(),
   
   # Application title
   titlePanel("Deterministic Age Structured Bio-economic Model"),
+
+   h4('For the corvina reina',em("(Cynoscion albus)"), 'fishery in the upper Gulf of Nicoya'),
   
   # Sidebar with a slider input for number of bins 
   sidebarLayout(
@@ -108,7 +111,7 @@ server <- function(input, output, session) {
   Model.full <- eventReactive(eventExpr = input$recalc,
                                  valueExpr = {
                                    
-                                   Model_fun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
+                                   modelfun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
                                  
                                    },
                                  ignoreNULL = FALSE
@@ -118,15 +121,15 @@ server <- function(input, output, session) {
   
   # Model.full <- reactive({
   #   
-  #   Model_fun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
+  #   modelfun(c(input$F.mort, input$Lc, input$months.open, input$recovery, input$NumYears))
   #   
   # })
   
   tableDATA  = reactive({ 
     
     Model.full() %>%
-    select(Months.closed , F.Mortality, Selectivity, year, CatchTotal, RevenueTotal, Biomass, Profit) %>%
-      rename(F = F.Mortality, MonthsClosed = Months.closed, Catch = CatchTotal, Revenue = RevenueTotal )
+    select(Months.open , F.Mortality, Selectivity, year, CatchTotal, RevenueTotal, Biomass, Profit) %>%
+      rename(F = F.Mortality, Months_Open = Months.open, Catch = CatchTotal, Revenue = RevenueTotal )
   
     
   })
@@ -135,7 +138,7 @@ server <- function(input, output, session) {
   
   NPV = reactive({ 
     Model.full() %>%
-    summarise(NPV = sum(PresentValue(Profit, discount = input$delta, year)))
+    summarise(NPV = sum(mypresentvalue(Profit, discount = input$delta, year)))
 
   })
   
@@ -145,7 +148,8 @@ server <- function(input, output, session) {
     DT::datatable(data = tableDATA(), 
                   options = list(pageLength = 10), 
                   rownames = FALSE) %>%
-     DT::formatRound(columns=c( 'F',  "Catch", "Revenue", "Biomass", "Profit"), digits=3)
+     DT::formatRound(columns=c( 'F'), digits=3) %>%
+     DT::formatCurrency(c("Catch", "Revenue", "Biomass", "Profit"),currency = "", interval = 3, mark = ",", digits = 0)
   
     })
   
@@ -160,7 +164,7 @@ server <- function(input, output, session) {
         geom_hline(yintercept = 0, lty = 2) +
         geom_line( size =1 ) +
         #scale_y_continuous(breaks = c(seq(-100,4000,600))) +
-        scale_x_continuous(breaks = c(seq(0,20, 2))) +
+        scale_x_continuous(breaks = c(seq(0,max(input$NumYears), 2))) +
         labs(x = toTitleCase(str_replace_all(input$x, "_", " ")),
              y = toTitleCase(str_replace_all(input$y, "_", " "))) +
         #labs(x = "Time (years)", y = "Real Profits") +
