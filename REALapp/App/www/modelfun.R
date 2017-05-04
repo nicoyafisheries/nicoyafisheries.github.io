@@ -1,5 +1,4 @@
-
-Model_fun = function(x) {
+modelfun = function(x) {
   Z = x[[1]]
   
   Lc = x[[2]]
@@ -8,7 +7,7 @@ Model_fun = function(x) {
   
   recovery = x[[4]]
   
-  NumYears = x[[5]]
+  NumYears = x[[5]] +1
   
   
   
@@ -267,13 +266,13 @@ Model_fun = function(x) {
   
   
   
-  Months.closed = 12 - months.open[1]
+  Months.open = months.open[1]
   
   F.Mortality = Fconditional * 12
   
   Selectivity = Lc
   
-  Out = cbind(Months.closed, F.Mortality, Selectivity, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
+  Out = cbind(Months.open, F.Mortality, Selectivity, year, N_at, CatchTotal, RevenueTotal, Biomass, Profit)
   
   
   # NPV = (sum(PresentValue(Profit, discount = 0.09, year)))

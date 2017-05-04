@@ -1,0 +1,11 @@
+name: age-structured_bioeconomic_model_of_corvina_reina_fishery
+title: App
+account: alxsmith
+server: shinyapps.io
+appId: 172984
+bundleId: 792884
+url: https://alxsmith.shinyapps.io/age-structured_bioeconomic_model_of_corvina_reina_fishery/
+when: 1492498901.9262
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: www/AgeAtLength.R|www/CatchCurve.R|www/MyTheme.R

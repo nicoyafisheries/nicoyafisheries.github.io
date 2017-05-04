@@ -1,4 +1,4 @@
-Mode <- function( values, round = 1){
+mymode <- function( values, round = 1){
   
   uniq = unique(round(values, digits = round))
                 
